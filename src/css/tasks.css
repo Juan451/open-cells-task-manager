@@ -1,0 +1,75 @@
+tasks-page {
+  display: flex;
+  flex-direction: column;
+  padding: 3rem 1.5rem;
+  min-height: 100%;
+}
+
+tasks-page .page-header {
+  max-width: 700px;
+}
+
+tasks-page .page-header .pretitle {
+  margin: 0;
+
+  font-size: 0.875rem;
+  line-height: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+
+  color: var(--color-core-blue);
+}
+
+tasks-page .page-header h1 {
+  margin: 1rem 0;
+
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.15;
+
+  color: var(--color-core-blue);
+}
+
+tasks-page .page-header p {
+  margin: 0 0 2rem;
+
+  font-size: 1.125rem;
+  font-weight: 300;
+  line-height: 1.625rem;
+
+  color: var(--color-blue-dark);
+}
+
+tasks-page .tasks-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 1rem;
+
+  width: 100%;
+  max-width: 700px;
+}
+
+tasks-page task-card {
+  display: block;
+  width: 100%;
+}
+
+tasks-page .empty-message {
+  padding: 2rem;
+
+  border: 1px solid var(--color-grey-mid);
+  border-radius: 2px;
+
+  background: var(--color-grey-light);
+
+  color: var(--color-grey);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+@media screen and (min-width: 46.5rem) {
+  tasks-page {
+    padding: 3rem;
+  }
+}
