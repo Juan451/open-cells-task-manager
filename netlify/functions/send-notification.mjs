@@ -1,9 +1,5 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-const RECIPIENT_EMAIL = 'notifications@example.com';
-
 export default async (request) => {
   if (request.method !== 'POST') {
     return new Response(
@@ -12,9 +8,49 @@ export default async (request) => {
       }),
       {
         status: 405,
+        headers: {
+          'Content-Type': 'application/json',
+        },
       },
     );
   }
+
+  const apiKey = process.env.RESEND_API_KEY;
+  const recipientEmail = process.env.RECIPIENT_EMAIL;
+
+  if (!apiKey) {
+    console.error('RESEND_API_KEY is missing');
+
+    return new Response(
+      JSON.stringify({
+        error: 'RESEND_API_KEY is not configured',
+      }),
+      {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+  }
+
+  if (!recipientEmail) {
+    console.error('RECIPIENT_EMAIL is missing');
+
+    return new Response(
+      JSON.stringify({
+        error: 'RECIPIENT_EMAIL is not configured',
+      }),
+      {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+  }
+
+  const resend = new Resend(apiKey);
 
   try {
     const { name, email, message } = await request.json();
@@ -26,14 +62,17 @@ export default async (request) => {
         }),
         {
           status: 400,
+          headers: {
+            'Content-Type': 'application/json',
+          },
         },
       );
     }
 
-    const { error } = await resend.emails.send({
+    const result = await resend.emails.send({
       from: 'Open Cells App <onboarding@resend.dev>',
 
-      to: [RECIPIENT_EMAIL],
+      to: [recipientEmail],
 
       subject: `New notification from ${name}`,
 
@@ -60,17 +99,31 @@ export default async (request) => {
       `,
     });
 
-    if (error) {
-      throw new Error(error.message);
+    console.log('Resend result:', result);
+
+    if (result.error) {
+      console.error('Resend error:', result.error);
+
+      return new Response(
+        JSON.stringify({
+          error: result.error.message,
+        }),
+        {
+          status: 500,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      );
     }
 
     return new Response(
       JSON.stringify({
         success: true,
+        id: result.data?.id,
       }),
       {
         status: 200,
-
         headers: {
           'Content-Type': 'application/json',
         },
@@ -81,11 +134,10 @@ export default async (request) => {
 
     return new Response(
       JSON.stringify({
-        error: 'Email could not be sent',
+        error: error.message,
       }),
       {
         status: 500,
-
         headers: {
           'Content-Type': 'application/json',
         },
