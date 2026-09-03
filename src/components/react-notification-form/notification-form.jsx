@@ -161,7 +161,7 @@ export function NotificationForm() {
       });
 
       if (!response.ok) {
-        throw new Error('Error sending notification');
+        throw new Error(`Error sending notification: ${response.status}`);
       }
 
       setStatus('Notification sent successfully.');
