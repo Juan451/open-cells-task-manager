@@ -1,5 +1,7 @@
 import { Resend } from 'resend';
 
+const RECIPIENT_EMAIL = 'jaegeresp@gmail.com';
+
 export default async (request) => {
   if (request.method !== 'POST') {
     return new Response(
@@ -16,30 +18,11 @@ export default async (request) => {
   }
 
   const apiKey = process.env.RESEND_API_KEY;
-  const recipientEmail = process.env.RECIPIENT_EMAIL;
 
   if (!apiKey) {
-    console.error('RESEND_API_KEY is missing');
-
     return new Response(
       JSON.stringify({
-        error: 'RESEND_API_KEY is not configured',
-      }),
-      {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      },
-    );
-  }
-
-  if (!recipientEmail) {
-    console.error('RECIPIENT_EMAIL is missing');
-
-    return new Response(
-      JSON.stringify({
-        error: 'RECIPIENT_EMAIL is not configured',
+        error: 'Email service is not configured',
       }),
       {
         status: 500,
@@ -72,34 +55,21 @@ export default async (request) => {
     const result = await resend.emails.send({
       from: 'Open Cells App <onboarding@resend.dev>',
 
-      to: [recipientEmail],
+      // El usuario NO puede modificar este destinatario.
+      to: [RECIPIENT_EMAIL],
 
-      subject: `New notification from ${name}`,
+      subject: `Suggestion from ${name}`,
 
-      html: `
-        <h2>New notification</h2>
+      text: `
+New suggestion
 
-        <p>
-          <strong>Name:</strong>
-          ${name}
-        </p>
+Name: ${name}
+Contact email: ${email}
 
-        <p>
-          <strong>Email:</strong>
-          ${email}
-        </p>
-
-        <p>
-          <strong>Message:</strong>
-        </p>
-
-        <p>
-          ${message}
-        </p>
+Message:
+${message}
       `,
     });
-
-    console.log('Resend result:', result);
 
     if (result.error) {
       console.error('Resend error:', result.error);
@@ -130,11 +100,11 @@ export default async (request) => {
       },
     );
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error('Error sending notification:', error);
 
     return new Response(
       JSON.stringify({
-        error: error.message,
+        error: 'The suggestion could not be sent.',
       }),
       {
         status: 500,

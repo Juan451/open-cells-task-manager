@@ -11,13 +11,12 @@ export class NotificationsPage extends PageMixin(LitElement) {
   render() {
     return html`
       <div class="page-header">
-        <p class="pretitle">REACT + OPEN CELLS</p>
+        <p class="pretitle">SUGGESTIONS & FEEDBACK</p>
 
-        <h1>Notifications</h1>
+        <h1>Contact us</h1>
 
         <p>
-          Example of a React component integrated inside an Open Cells
-          application.
+          Send us your questions, suggestions or feedback about the application.
         </p>
       </div>
 

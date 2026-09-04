@@ -3,6 +3,7 @@
 @import url('./second.css');
 @import url('./tasks.css');
 @import url('./meals.css');
+@import url('./notifications.css');
 :root {
   --color-aqua:       #2DCCCD;
   --color-blue-dark:  #043263;
