@@ -1,31 +1,58 @@
 # Open Cells Task Manager
 
-A sample web application built with **Open Cells**, **Lit** and **Web Components**.
+A sample web application built with **Open Cells**, **Lit**, **Web Components** and **React**.
 
-The project was created as a learning and demonstration application to explore modern frontend concepts such as routing, reactive components, Shadow DOM, Light DOM, slots, custom events, API integration, React interoperability, serverless functions and testing.
-
-🌐 **Live application:**  
-https://open-cells-task-manager-app.netlify.app/#!/
+The project was created as a learning and demonstration application to explore modern frontend concepts such as routing, reactive components, Shadow DOM, Light DOM, slots, custom events, API integration, React interoperability, serverless functions, testing and continuous deployment.
 
 ---
 
-## Features
+## Live Demo
 
-The application includes several pages and components demonstrating different frontend concepts and architectural patterns.
+The application is publicly available on GitHub Pages:
 
-### Home
+https://juan451.github.io/open-cells-task-manager/
+
+It is also deployed on Netlify:
+
+https://open-cells-task-manager-app.netlify.app/
+
+### GitHub Pages routes
+
+- Home  
+  https://juan451.github.io/open-cells-task-manager/#!/
+
+- Tasks  
+  https://juan451.github.io/open-cells-task-manager/#!/tasks
+
+- Meals  
+  https://juan451.github.io/open-cells-task-manager/#!/meals
+
+- Notifications  
+  https://juan451.github.io/open-cells-task-manager/#!/notifications
+
+> The Netlify deployment is the full deployment because it also includes the serverless function used by the notification form.
+
+---
+
+# Features
+
+The application contains several pages and reusable components that demonstrate different frontend concepts and architectural patterns.
+
+---
+
+## Home
 
 The landing page of the application.
 
-It introduces the project and provides navigation to the different sections.
+It introduces the project and provides access to the different sections.
 
-Main concepts:
+Main concepts demonstrated:
 
 - Open Cells routing
 - Lit components
-- Global application styles
 - Light DOM
-- Navigation between pages
+- Global application styles
+- Client-side navigation
 
 Route:
 
@@ -35,9 +62,9 @@ Route:
 
 ---
 
-### Tasks
+## Tasks
 
-A simple task manager built with Lit.
+A simple task manager built with **Lit**.
 
 Users can:
 
@@ -51,13 +78,13 @@ Each task is rendered using a reusable Web Component:
 <task-card></task-card>
 ```
 
-The page passes the task to the child component using a JavaScript property:
+The page passes a task object to the child component using a JavaScript property:
 
 ```js
 <task-card .task=${task}></task-card>
 ```
 
-The child component communicates back to the page using a custom event:
+The child component communicates with the parent using a custom event:
 
 ```js
 new CustomEvent('toggle-task', {
@@ -69,30 +96,37 @@ new CustomEvent('toggle-task', {
 });
 ```
 
-This demonstrates the typical Web Components communication pattern:
+The communication flow is:
 
 ```text
-Parent
-  │
-  │ property
-  ▼
-Child component
-  │
-  │ CustomEvent
-  ▼
-Parent
+TasksPage
+    │
+    │ .task=${task}
+    ▼
+TaskCard
+    │
+    │ CustomEvent
+    ▼
+TasksPage
+    │
+    ▼
+Update state
+    │
+    ▼
+Lit re-renders
 ```
 
-Main concepts:
+Main concepts demonstrated:
 
 - Lit reactive properties
 - Web Components
 - Shadow DOM
-- Custom events
+- Custom Events
 - `bubbles`
 - `composed`
 - Parent → child communication
 - Child → parent communication
+- Immutable state updates
 - Reusable components
 
 Route:
@@ -103,11 +137,15 @@ Route:
 
 ---
 
-### Meals
+## Meals
 
 A food search page connected to the public **TheMealDB API**.
 
-Users can search for meals by name and view information such as:
+API documentation:
+
+https://www.themealdb.com/api.php
+
+Users can search for meals and view information such as:
 
 - Meal name
 - Image
@@ -117,51 +155,57 @@ Users can search for meals by name and view information such as:
 - Measurements
 - Cooking instructions
 
-API:
-
-https://www.themealdb.com/api.php
-
 Example search:
 
 ```text
-Chicken
+chicken
 ```
 
-The application sends the request through a reusable Data Manager component instead of calling the API directly from the page.
+The page does not call the API directly.
+
+Instead, all HTTP communication is delegated to a reusable:
+
+```html
+<data-manager></data-manager>
+```
+
+component.
 
 Architecture:
 
 ```text
 MealsPage
     │
+    │ searchMeals()
     ▼
-<data-manager>
+DataManager
     │
-    ▼
-fetch()
-    │
+    │ fetch()
     ▼
 TheMealDB API
     │
+    │ JSON
     ▼
-CustomEvent
+DataManager
     │
+    │ CustomEvent
     ▼
 MealsPage
+    │
+    ▼
+Render results
 ```
 
-This keeps HTTP logic separated from UI logic.
+Main concepts demonstrated:
 
-Main concepts:
-
-- REST APIs
-- `fetch`
-- async operations
-- loading states
-- error handling
-- reusable Data Manager
-- custom events
-- separation of concerns
+- REST API integration
+- Fetch API
+- Async JavaScript
+- Loading states
+- Error handling
+- Data Manager pattern
+- Separation of concerns
+- Custom Events
 
 Route:
 
@@ -171,9 +215,9 @@ Route:
 
 ---
 
-### Meal detail
+## Meal Detail
 
-Clicking a meal opens a reusable:
+Clicking on a meal opens a reusable:
 
 ```html
 <meal-detail></meal-detail>
@@ -181,9 +225,9 @@ Clicking a meal opens a reusable:
 
 component.
 
-This component demonstrates the difference between **Shadow DOM** and **Light DOM** using named slots.
+This component demonstrates the relationship between **Shadow DOM**, **Light DOM** and **slots**.
 
-Example:
+Example usage:
 
 ```html
 <meal-detail>
@@ -203,8 +247,11 @@ Inside the component:
 
 ```html
 <slot name="image"></slot>
+
 <slot name="title"></slot>
+
 <slot name="ingredients"></slot>
+
 <slot name="instructions"></slot>
 ```
 
@@ -213,15 +260,21 @@ Conceptually:
 ```text
 <meal-detail>
 
-    Light DOM
-    ├── image
-    ├── title
-    ├── ingredients
-    └── instructions
+    LIGHT DOM
 
-        ↓ slots
+    ├── <img slot="image">
+    ├── <h2 slot="title">
+    ├── <ul slot="ingredients">
+    └── <p slot="instructions">
 
-    Shadow DOM
+              ↓
+
+          SLOT DISTRIBUTION
+
+              ↓
+
+    SHADOW DOM
+
     ├── <slot name="image">
     ├── <slot name="title">
     ├── <slot name="ingredients">
@@ -230,43 +283,43 @@ Conceptually:
 </meal-detail>
 ```
 
-Main concepts:
+Main concepts demonstrated:
 
 - Shadow DOM
 - Light DOM
-- `<slot>`
-- named slots
+- Slots
+- Named slots
 - `::slotted`
-- reusable UI components
-- style encapsulation
+- Style encapsulation
+- Reusable UI components
 
 ---
 
-### Notifications
+## Notifications
 
-This page demonstrates how a **React component can be integrated inside an Open Cells / Lit application**.
+The Notifications page demonstrates how a **React component can be integrated inside an Open Cells / Lit application**.
 
-Route:
+The page acts as a suggestions and feedback form.
 
-```text
-#!/notifications
-```
+Users can send:
 
-The notification form is implemented with React and uses:
+- Their name
+- Their contact email
+- A suggestion, question or feedback message
 
-```js
+The recipient of the notification is controlled by the backend and cannot be modified from the frontend.
+
+The form is implemented using React:
+
+```jsx
 useState();
 ```
 
-for its internal state.
-
-The React application is exposed as a Web Component:
+and exposed to the rest of the application as a Web Component:
 
 ```html
 <react-notification-form> </react-notification-form>
 ```
-
-This allows Open Cells to consume the React component without needing to know how it is implemented internally.
 
 Architecture:
 
@@ -282,6 +335,7 @@ NotificationsPage
     ▼
 React
     │
+    │ POST
     ▼
 Netlify Function
     │
@@ -289,26 +343,37 @@ Netlify Function
 Resend
     │
     ▼
-Email
+Email notification
 ```
 
-Main concepts:
+Main concepts demonstrated:
 
 - React
 - `useState`
-- controlled forms
-- Web Components interoperability
-- React inside a Web Component
+- Controlled forms
+- React interoperability
+- Web Components
 - Netlify Functions
-- serverless architecture
-- email notifications
-- environment variables
+- Serverless architecture
+- Environment variables
+- Resend email API
+- Separation between frontend and backend responsibilities
+
+Route:
+
+```text
+#!/notifications
+```
+
+The complete notification flow is available in the Netlify deployment:
+
+https://open-cells-task-manager-app.netlify.app/#!/notifications
 
 ---
 
-## Data Manager
+# Data Manager
 
-API calls are centralized in a Data Manager component.
+The application centralizes API communication in a Data Manager component.
 
 Example:
 
@@ -320,28 +385,49 @@ Example:
 ></data-manager>
 ```
 
-Instead of mixing network logic with UI logic:
+Instead of putting networking logic directly inside a page:
 
 ```text
-Page
- ├── render
- ├── state
- └── events
+MealsPage
 
-Data Manager
- ├── fetch
- ├── API URLs
- ├── HTTP errors
- └── API responses
+├── UI
+├── state
+├── rendering
+└── user events
 ```
 
-This provides better separation of responsibilities and makes components easier to maintain and test.
+the Data Manager handles:
+
+```text
+DataManager
+
+├── fetch
+├── API endpoints
+├── HTTP errors
+├── JSON parsing
+└── API response events
+```
+
+This improves:
+
+- Separation of concerns
+- Maintainability
+- Reusability
+- Testability
 
 ---
 
-## Open Cells lifecycle
+# Open Cells Lifecycle
 
-Some pages use the Open Cells `PageMixin`:
+Some pages use:
+
+```js
+PageMixin;
+```
+
+from Open Cells.
+
+Example:
 
 ```js
 export class MealsPage extends PageMixin(LitElement) {
@@ -359,22 +445,23 @@ onPageLeave() {
 }
 ```
 
-For example, the Meals page clears its search state when the user navigates away.
+For example, the Meals page can clear its search state when the user navigates away.
 
 This is different from the standard Web Components lifecycle:
 
 ```js
 connectedCallback();
+
 disconnectedCallback();
 ```
 
-because Open Cells can keep pages mounted while changing which page is active.
+Open Cells may keep pages mounted while only changing which page is active, so `onPageEnter()` and `onPageLeave()` are useful for page-level lifecycle management.
 
 ---
 
-## Routing
+# Routing
 
-Routing is managed by Open Cells.
+Routing is managed by **Open Cells**.
 
 Example route:
 
@@ -385,7 +472,9 @@ Example route:
   component: 'meals-page',
 
   action: async () => {
-    await import('../pages/meals/meals-page.js');
+    await import(
+      '../pages/meals/meals-page.js'
+    );
   },
 }
 ```
@@ -396,17 +485,20 @@ Navigation can then be performed with:
 this.controller.navigate('meals');
 ```
 
-The application currently uses hash-based routes:
+The project uses hash-based routes:
 
 ```text
+#!/
 #!/tasks
 #!/meals
 #!/notifications
 ```
 
+This is useful for static hosting environments such as GitHub Pages because route navigation is handled by the browser.
+
 ---
 
-## Application shell
+# Application Shell
 
 The main application layout is implemented by:
 
@@ -416,42 +508,34 @@ The main application layout is implemented by:
 
 It contains:
 
-- Application header
-- Navigation
+- Header
+- Application logo
+- Documentation links
 - Expandable sidebar
-- Page container
-- Open Cells routing outlet
+- Page navigation
+- Main page container
 
-The sidebar allows navigation between the different pages.
+The sidebar provides navigation between the application pages.
 
 ---
 
-## Styling
+# Styling
 
-The application uses two different styling strategies.
+The application uses two styling strategies.
 
-### Global page styles
+## Global page styles
 
-Pages such as:
-
-```text
-Home
-Tasks
-Meals
-Notifications
-```
-
-use global CSS.
-
-Example:
+Pages use global CSS files:
 
 ```text
 src/css/
+
 ├── main.css
 ├── home.css
 ├── second.css
 ├── tasks.css
-└── meals.css
+├── meals.css
+└── notifications.css
 ```
 
 These pages render using Light DOM:
@@ -462,9 +546,19 @@ createRenderRoot() {
 }
 ```
 
+This allows global selectors such as:
+
+```css
+meals-page .page-header {
+  ...
+}
+```
+
+to style page content.
+
 ---
 
-### Encapsulated component styles
+## Encapsulated component styles
 
 Reusable Lit components use Shadow DOM and encapsulated styles.
 
@@ -472,33 +566,64 @@ Example:
 
 ```text
 task-card/
+
 ├── task-card.js
 └── task-card.css.js
 ```
+
+Inside the component:
 
 ```js
 static styles = styles;
 ```
 
-The Shadow DOM prevents global CSS from accidentally modifying the internal design of reusable components.
+This prevents global styles from accidentally modifying internal component design.
 
-CSS Custom Properties are used to share design tokens:
+---
+
+# CSS Custom Properties
+
+The application uses CSS Custom Properties as design tokens.
+
+Example:
 
 ```css
 :root {
+  --color-aqua: #2dcccd;
+
   --color-blue-dark: #043263;
+
+  --color-blue-light: #5bbeff;
+
   --color-blue: #1973b8;
+
   --color-core-blue: #004481;
+
+  --color-core-light: #d4edfc;
+
+  --color-grey-light: #f4f4f4;
+
+  --color-grey-mid: #d9d9d9;
+
+  --color-grey: #666666;
+
   --color-navy: #072146;
+
+  --color-red: #d44b50;
+
   --color-white: #ffffff;
 }
 ```
 
+CSS Custom Properties can be inherited by components even when they use Shadow DOM.
+
+This provides controlled theming while maintaining component encapsulation.
+
 ---
 
-## Technologies
+# Technologies
 
-### Frontend
+## Frontend
 
 - JavaScript
 - HTML
@@ -509,54 +634,61 @@ CSS Custom Properties are used to share design tokens:
 - React
 - React DOM
 
-### Architecture
+## Architecture
 
+- Single Page Application
 - Component-based architecture
-- SPA
-- Client-side routing
 - Data Manager pattern
+- Client-side routing
 - Custom Events
 - Shadow DOM
 - Light DOM
 - Slots
+- Reactive properties
 
-### API
+## API
 
 - TheMealDB
 - Fetch API
 
-### Backend / Serverless
+## Backend / Serverless
 
 - Netlify Functions
 - Node.js
 - Resend
 
-### Build tools
+## Build tools
 
 - Vite
 - npm
 
-### Testing
+## Testing
 
 - Web Test Runner
 - Open WC Testing
 - Sinon
 - Chai assertions
 
-### Deployment
+## Deployment
 
 - GitHub
+- GitHub Actions
+- GitHub Pages
 - Netlify
-- Continuous deployment
+- Continuous Deployment
 
 ---
 
-## Project structure
+# Project Structure
 
-A simplified version of the project structure:
+Simplified project structure:
 
 ```text
 open-cells-task-manager/
+│
+├── .github/
+│   └── workflows/
+│       └── deploy-pages.yml
 │
 ├── functions/
 │   └── send-notification.mjs
@@ -564,6 +696,9 @@ open-cells-task-manager/
 ├── src/
 │   │
 │   ├── components/
+│   │   │
+│   │   ├── app-index/
+│   │   │
 │   │   ├── dm/
 │   │   │   └── data-manager.js
 │   │   │
@@ -594,19 +729,22 @@ open-cells-task-manager/
 │       ├── home.css
 │       ├── second.css
 │       ├── tasks.css
-│       └── meals.css
+│       ├── meals.css
+│       └── notifications.css
 │
 ├── test/
 │
-├── netlify.toml
 ├── index.html
 ├── package.json
+├── package-lock.json
+├── vite.config.js
+├── netlify.toml
 └── README.md
 ```
 
 ---
 
-## Getting started
+# Getting Started
 
 Clone the repository:
 
@@ -626,17 +764,23 @@ Install dependencies:
 npm install
 ```
 
-Start the Vite development server:
+Start the development server:
 
 ```bash
 npm run dev
 ```
 
+The application will normally be available at:
+
+```text
+http://localhost:5173
+```
+
 ---
 
-## Local development with Netlify Functions
+# Local Development with Netlify
 
-The email notification feature uses Netlify Functions.
+The notification feature uses a Netlify Function.
 
 To run the complete application locally, including serverless functions:
 
@@ -644,38 +788,39 @@ To run the complete application locally, including serverless functions:
 netlify dev
 ```
 
-The frontend can still be developed independently with:
+Using only:
 
 ```bash
 npm run dev
 ```
 
-but Netlify Functions will not be available through Vite alone.
+starts the Vite frontend but does not provide the Netlify Function environment.
 
 ---
 
-## Environment variables
+# Environment Variables
 
-The notification service requires the following environment variables:
+The email notification service requires:
 
 ```text
 RESEND_API_KEY
-RECIPIENT_EMAIL
 ```
 
-These variables should be configured in Netlify.
+This variable is configured securely in Netlify.
 
-Do not store API keys directly in the source code or commit them to GitHub.
+The API key must never be committed to GitHub.
 
-Example:
+Example usage:
 
 ```js
 const apiKey = process.env.RESEND_API_KEY;
 ```
 
+The notification recipient is controlled on the backend so users cannot modify the destination address from the frontend.
+
 ---
 
-## Scripts
+# Scripts
 
 | Script                  | Description                          |
 | ----------------------- | ------------------------------------ |
@@ -683,18 +828,20 @@ const apiKey = process.env.RESEND_API_KEY;
 | `npm run build`         | Build the application for production |
 | `npm run preview`       | Preview the production build         |
 | `npm test`              | Run the test suite                   |
-| `npm run test:watch`    | Run tests in watch mode              |
+| `npm run test:watch`    | Run tests continuously in watch mode |
 | `npm run test:coverage` | Run tests and generate coverage      |
 
 ---
 
-## Testing
+# Testing
 
-The application uses:
+The project uses:
 
-- `@web/test-runner`
-- `@open-wc/testing`
-- Sinon
+```text
+@web/test-runner
+@open-wc/testing
+sinon
+```
 
 Example:
 
@@ -707,15 +854,18 @@ import sinon from 'sinon';
 Tests can verify:
 
 - Component rendering
-- Reactive properties
-- Shadow DOM
+- Lit reactive properties
+- Shadow DOM content
 - Custom Events
+- `bubbles`
+- `composed`
 - API calls
 - `fetch`
-- success responses
-- error responses
-- page lifecycle
-- component interaction
+- Successful API responses
+- API errors
+- Page lifecycle
+- Component interaction
+- React integration
 
 Run tests:
 
@@ -723,7 +873,7 @@ Run tests:
 npm test
 ```
 
-Run tests continuously:
+Run continuously:
 
 ```bash
 npm run test:watch
@@ -737,15 +887,15 @@ npm run test:coverage
 
 ---
 
-## Production build
+# Production Build
 
-Create the production bundle:
+Create a production build with:
 
 ```bash
 npm run build
 ```
 
-Vite generates the production files inside:
+Vite generates the production bundle inside:
 
 ```text
 dist/
@@ -753,9 +903,93 @@ dist/
 
 ---
 
-## Deployment
+# Vite Configuration
 
-The application is deployed with Netlify.
+The project supports both Netlify and GitHub Pages deployments.
+
+Example:
+
+```js
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  base:
+    process.env.GITHUB_ACTIONS === 'true' ? '/open-cells-task-manager/' : '/',
+});
+```
+
+This means:
+
+```text
+Local development
+→ /
+
+Netlify
+→ /
+
+GitHub Pages
+→ /open-cells-task-manager/
+```
+
+---
+
+# Deployment
+
+The project is deployed using both **GitHub Pages** and **Netlify**.
+
+---
+
+## GitHub Pages
+
+GitHub Pages deployment:
+
+https://juan451.github.io/open-cells-task-manager/
+
+Deployment is automated using **GitHub Actions**.
+
+Workflow:
+
+```text
+.github/
+└── workflows/
+    └── deploy-pages.yml
+```
+
+Deployment flow:
+
+```text
+git push
+    ↓
+GitHub
+    ↓
+GitHub Actions
+    ↓
+npm ci
+    ↓
+npm run build
+    ↓
+dist/
+    ↓
+GitHub Pages
+```
+
+Each push to the configured branch can automatically trigger a new deployment.
+
+---
+
+## Netlify
+
+Netlify deployment:
+
+https://open-cells-task-manager-app.netlify.app/
+
+Netlify provides:
+
+- Static hosting
+- Continuous deployment
+- Netlify Functions
+- Environment variables
+- Serverless backend functionality
 
 Configuration is stored in:
 
@@ -777,7 +1011,7 @@ Example:
   NODE_VERSION = "22"
 ```
 
-The project uses continuous deployment:
+Netlify deployment flow:
 
 ```text
 Local development
@@ -792,25 +1026,144 @@ Netlify
       ↓
 npm run build
       ↓
-Production deployment
+Deploy
 ```
-
-Live application:
-
-https://open-cells-task-manager-app.netlify.app/#!/
 
 ---
 
-## Learning objectives
+# Notification Architecture
 
-This project demonstrates how different frontend technologies can coexist in the same application.
+The notification system demonstrates a simple full-stack flow.
 
-It includes practical examples of:
+```text
+React form
+    ↓
+fetch()
+    ↓
+Netlify Function
+    ↓
+Resend API
+    ↓
+Email
+```
 
+The frontend sends:
+
+```json
+{
+  "name": "...",
+  "email": "...",
+  "message": "..."
+}
+```
+
+The serverless function decides the recipient.
+
+The frontend does not control the destination email address.
+
+This prevents users from turning the application into an arbitrary email sending endpoint.
+
+---
+
+# Shadow DOM vs Light DOM
+
+The project demonstrates both approaches.
+
+## Shadow DOM
+
+Used by reusable components such as:
+
+```html
+<task-card></task-card>
+```
+
+Advantages:
+
+- Style encapsulation
+- Internal DOM isolation
+- Protection from global CSS
+- Good fit for reusable Design System components
+
+---
+
+## Light DOM
+
+Used by some page-level components:
+
+```js
+createRenderRoot() {
+  return this;
+}
+```
+
+Advantages:
+
+- Global styles can target page content
+- Easier application-level layout styling
+- Useful when working with existing global CSS architecture
+
+---
+
+# Slots
+
+The project demonstrates slots using:
+
+```html
+<meal-detail></meal-detail>
+```
+
+Slots allow a component to define where external Light DOM content should appear inside its Shadow DOM.
+
+Example:
+
+```html
+<slot name="title"></slot>
+```
+
+Consumer:
+
+```html
+<h2 slot="title">Chicken Curry</h2>
+```
+
+Slots allow reusable components to control layout while letting consumers provide content.
+
+---
+
+# Custom Events
+
+Web Components communicate upward using Custom Events.
+
+Example:
+
+```js
+this.dispatchEvent(
+  new CustomEvent('toggle-task', {
+    detail: {
+      id: this.task.id,
+    },
+
+    bubbles: true,
+
+    composed: true,
+  }),
+);
+```
+
+`bubbles: true` allows the event to bubble through the DOM.
+
+`composed: true` allows the event to cross Shadow DOM boundaries.
+
+---
+
+# Learning Objectives
+
+This project demonstrates practical examples of:
+
+- JavaScript
 - Lit
 - Open Cells
 - React
-- JavaScript
 - Web Components
 - Shadow DOM
 - Light DOM
@@ -819,10 +1172,19 @@ It includes practical examples of:
 - Reactive properties
 - Page lifecycle
 - REST APIs
+- Fetch API
 - Async JavaScript
+- Separation of concerns
+- Data Manager pattern
 - Serverless functions
-- Email services
-- Testing
-- Continuous deployment
+- Email APIs
+- Environment variables
+- Sinon
+- Component testing
+- Git
+- GitHub Actions
+- GitHub Pages
+- Netlify
+- Continuous Deployment
 
 The application is intended both as a learning project and as a reference implementation for experimenting with modern frontend architecture.
