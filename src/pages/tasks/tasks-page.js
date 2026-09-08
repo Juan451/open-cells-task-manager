@@ -1,6 +1,7 @@
 import { LitElement, html } from 'lit';
 
 import '../../components/task-card/task-card.js';
+import '../../components/dm/data-manager.js';
 
 export class TasksPage extends LitElement {
   static properties = {
@@ -12,81 +13,68 @@ export class TasksPage extends LitElement {
   constructor() {
     super();
 
-    this.tasks = [
-      {
-        id: 1,
-        title: 'Learn LitElement',
-        completed: false,
-      },
-      {
-        id: 2,
-        title: 'Learn Open Cells',
-        completed: false,
-      },
-      {
-        id: 3,
-        title: 'Prepare technical interview',
-        completed: true,
-      },
-    ];
+    this.tasks = [];
   }
 
   createRenderRoot() {
     return this;
   }
 
+  firstUpdated() {
+    this._dataManager = this.querySelector('data-manager');
+    this._dataManager.getTasks();
+  }
+
   render() {
     return html`
+      <data-manager
+        @get-tasks-success=${this._onGetTasksSuccess}
+        @get-tasks-error=${this._onGetTasksError}
+        @toggle-task-success=${this._onToggleTaskSuccess}
+        @toggle-task-error=${this._onToggleTaskError}
+      ></data-manager>
+
       <div class="page-header">
-        <p class="pretitle">
-          OPEN CELLS TASK MANAGER
-        </p>
+        <p class="pretitle">OPEN CELLS TASK MANAGER</p>
 
-        <h1>
-          My tasks
-        </h1>
+        <h1>My tasks</h1>
 
-        <p>
-          Manage your tasks while learning LitElement and Open Cells.
-        </p>
+        <p>Manage your tasks while learning LitElement and Open Cells.</p>
       </div>
 
-      <div
-        class="tasks-list"
-        @toggle-task=${this._onToggleTask}
-      >
+      <div class="tasks-list" @toggle-task=${this._onToggleTask}>
         ${this.tasks.length
           ? this.tasks.map(
-              task => html`
-                <task-card
-                  .task=${task}
-                ></task-card>
-              `,
+              (task) => html` <task-card .task=${task}></task-card> `,
             )
-          : html`
-              <div class="empty-message">
-                You don't have any tasks.
-              </div>
-            `}
+          : html` <div class="empty-message">You don't have any tasks.</div> `}
       </div>
     `;
   }
 
-  _onToggleTask(event) {
-    const { id } = event.detail;
-    console.log('a cual le he dado?', id)
-    this._toggleTask(id);
+  _onGetTasksSuccess(event) {
+    this.tasks = event.detail.tasks;
   }
 
-  _toggleTask(id) {
-    this.tasks = this.tasks.map(task =>
-      task.id === id
-        ? {
-            ...task,
-            completed: !task.completed,
-          }
-        : task,
+  _onGetTasksError(event) {
+    console.error('Error al cargar las tareas:', event.detail.error);
+  }
+
+  _onToggleTask(event) {
+    const { id } = event.detail;
+    this._dataManager.toggleTask(id);
+  }
+
+  _onToggleTaskSuccess(event) {
+    const updatedTask = event.detail.task;
+
+    this.tasks = this.tasks.map((task) =>
+      task.id === updatedTask.id ? updatedTask : task,
     );
+  }
+
+  _onToggleTaskError(event) {
+    console.error('Error al actualizar la tarea:', event.detail.error);
   }
 }
 

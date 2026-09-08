@@ -1,6 +1,8 @@
 import { LitElement } from 'lit';
 
-const BASE_URL = 'https://www.themealdb.com/api/json/v1/1';
+const MEALS_BASE_URL = 'https://www.themealdb.com/api/json/v1/1';
+const TASKS_BASE_URL =
+  'http://opencells-api-env.eba-4u9emsyt.eu-west-2.elasticbeanstalk.com/api/tasks';
 
 export class DataManager extends LitElement {
   dispatchCustomEvent(eventName, detail = {}) {
@@ -13,8 +15,8 @@ export class DataManager extends LitElement {
     );
   }
 
-  async _request(endpoint) {
-    const response = await fetch(`${BASE_URL}${endpoint}`);
+  async _request(baseUrl, endpoint, options = {}) {
+    const response = await fetch(`${baseUrl}${endpoint}`, options);
 
     if (!response.ok) {
       throw new Error(
@@ -25,11 +27,16 @@ export class DataManager extends LitElement {
     return response.json();
   }
 
+  // --- Meals (TheMealDB) ---
+
   async searchMeals(searchText) {
     try {
       const search = encodeURIComponent(searchText);
 
-      const data = await this._request(`/search.php?s=${search}`);
+      const data = await this._request(
+        MEALS_BASE_URL,
+        `/search.php?s=${search}`,
+      );
 
       this.dispatchCustomEvent('search-meals-success', {
         meals: data.meals ?? [],
@@ -43,7 +50,7 @@ export class DataManager extends LitElement {
 
   async getMealById(id) {
     try {
-      const data = await this._request(`/lookup.php?i=${id}`);
+      const data = await this._request(MEALS_BASE_URL, `/lookup.php?i=${id}`);
 
       this.dispatchCustomEvent('get-meal-success', {
         meal: data.meals?.[0] ?? null,
@@ -57,7 +64,7 @@ export class DataManager extends LitElement {
 
   async getRandomMeal() {
     try {
-      const data = await this._request('/random.php');
+      const data = await this._request(MEALS_BASE_URL, '/random.php');
 
       this.dispatchCustomEvent('random-meal-success', {
         meal: data.meals?.[0] ?? null,
@@ -71,7 +78,7 @@ export class DataManager extends LitElement {
 
   async getCategories() {
     try {
-      const data = await this._request('/categories.php');
+      const data = await this._request(MEALS_BASE_URL, '/categories.php');
 
       this.dispatchCustomEvent('categories-success', {
         categories: data.categories ?? [],
@@ -87,7 +94,10 @@ export class DataManager extends LitElement {
     try {
       const value = encodeURIComponent(category);
 
-      const data = await this._request(`/filter.php?c=${value}`);
+      const data = await this._request(
+        MEALS_BASE_URL,
+        `/filter.php?c=${value}`,
+      );
 
       this.dispatchCustomEvent('meals-by-category-success', {
         meals: data.meals ?? [],
@@ -103,7 +113,10 @@ export class DataManager extends LitElement {
     try {
       const value = encodeURIComponent(area);
 
-      const data = await this._request(`/filter.php?a=${value}`);
+      const data = await this._request(
+        MEALS_BASE_URL,
+        `/filter.php?a=${value}`,
+      );
 
       this.dispatchCustomEvent('meals-by-area-success', {
         meals: data.meals ?? [],
@@ -119,7 +132,10 @@ export class DataManager extends LitElement {
     try {
       const value = encodeURIComponent(ingredient);
 
-      const data = await this._request(`/filter.php?i=${value}`);
+      const data = await this._request(
+        MEALS_BASE_URL,
+        `/filter.php?i=${value}`,
+      );
 
       this.dispatchCustomEvent('meals-by-ingredient-success', {
         meals: data.meals ?? [],
@@ -130,37 +146,37 @@ export class DataManager extends LitElement {
       });
     }
   }
-  async getMealById(id) {
+
+  // --- Tasks (Spring backend Amazon web services) ---
+
+  async getTasks() {
     try {
-      const response = await fetch(
-        `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`,
-      );
+      const tasks = await this._request(TASKS_BASE_URL, '');
 
-      if (!response.ok) {
-        throw new Error(`HTTP error: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      this.dispatchEvent(
-        new CustomEvent('meal-detail-success', {
-          detail: {
-            meal: data.meals?.[0] ?? null,
-          },
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.dispatchCustomEvent('get-tasks-success', {
+        tasks,
+      });
     } catch (error) {
-      this.dispatchEvent(
-        new CustomEvent('meal-detail-error', {
-          detail: {
-            error,
-          },
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.dispatchCustomEvent('get-tasks-error', {
+        error,
+      });
+    }
+  }
+
+  async toggleTask(id) {
+    try {
+      const task = await this._request(TASKS_BASE_URL, `/${id}/toggle`, {
+        method: 'PATCH',
+      });
+
+      this.dispatchCustomEvent('toggle-task-success', {
+        task,
+      });
+    } catch (error) {
+      this.dispatchCustomEvent('toggle-task-error', {
+        error,
+        id,
+      });
     }
   }
 }
