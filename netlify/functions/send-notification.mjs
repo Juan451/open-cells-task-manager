@@ -2,7 +2,37 @@ import { Resend } from 'resend';
 
 const RECIPIENT_EMAIL = 'jaegeresp@gmail.com';
 
+const ALLOWED_ORIGINS = [
+  'https://juan451.github.io',
+  'https://open-cells-task-manager-app.netlify.app',
+  'http://localhost:5173',
+  'http://localhost:8888',
+];
+
 export default async (request) => {
+  const origin = request.headers.get('origin');
+
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': ALLOWED_ORIGINS.includes(origin)
+      ? origin
+      : 'https://juan451.github.io',
+
+    'Access-Control-Allow-Headers': 'Content-Type',
+
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+
+    'Content-Type': 'application/json',
+  };
+
+  // Preflight CORS
+  if (request.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: corsHeaders,
+    });
+  }
+
+  // Solo permitimos POST
   if (request.method !== 'POST') {
     return new Response(
       JSON.stringify({
@@ -10,9 +40,7 @@ export default async (request) => {
       }),
       {
         status: 405,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: corsHeaders,
       },
     );
   }
@@ -26,9 +54,7 @@ export default async (request) => {
       }),
       {
         status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: corsHeaders,
       },
     );
   }
@@ -45,9 +71,7 @@ export default async (request) => {
         }),
         {
           status: 400,
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: corsHeaders,
         },
       );
     }
@@ -55,7 +79,7 @@ export default async (request) => {
     const result = await resend.emails.send({
       from: 'Open Cells App <onboarding@resend.dev>',
 
-      // El usuario NO puede modificar este destinatario.
+      // El usuario no puede modificar el destinatario
       to: [RECIPIENT_EMAIL],
 
       subject: `Suggestion from ${name}`,
@@ -80,9 +104,7 @@ ${message}
         }),
         {
           status: 500,
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: corsHeaders,
         },
       );
     }
@@ -94,9 +116,7 @@ ${message}
       }),
       {
         status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: corsHeaders,
       },
     );
   } catch (error) {
@@ -108,9 +128,7 @@ ${message}
       }),
       {
         status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: corsHeaders,
       },
     );
   }
