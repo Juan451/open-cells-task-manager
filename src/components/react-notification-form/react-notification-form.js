@@ -16,6 +16,7 @@ export class ReactNotificationForm extends HTMLElement {
 
   disconnectedCallback() {
     this.root?.unmount();
+
     this.root = null;
   }
 }

@@ -9,30 +9,55 @@ const ALLOWED_ORIGINS = [
   'http://localhost:8888',
 ];
 
-export default async (request) => {
-  const origin = request.headers.get('origin');
-
-  const corsHeaders = {
-    'Access-Control-Allow-Origin': ALLOWED_ORIGINS.includes(origin)
-      ? origin
-      : 'https://juan451.github.io',
+function getCorsHeaders(origin) {
+  const headers = {
+    'Content-Type': 'application/json',
 
     'Access-Control-Allow-Headers': 'Content-Type',
 
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
-
-    'Content-Type': 'application/json',
   };
 
-  // Preflight CORS
+  if (ALLOWED_ORIGINS.includes(origin)) {
+    headers['Access-Control-Allow-Origin'] = origin;
+  }
+
+  return headers;
+}
+
+export default async (request) => {
+  const origin = request.headers.get('origin');
+
+  const corsHeaders = getCorsHeaders(origin);
+
+  /*
+   * GitHub Pages y Netlify tienen orígenes diferentes.
+   *
+   * Antes del POST, el navegador realiza una petición
+   * OPTIONS para comprobar la política CORS.
+   */
   if (request.method === 'OPTIONS') {
+    if (origin && !ALLOWED_ORIGINS.includes(origin)) {
+      return new Response(
+        JSON.stringify({
+          error: 'Origin not allowed',
+        }),
+        {
+          status: 403,
+          headers: corsHeaders,
+        },
+      );
+    }
+
     return new Response(null, {
       status: 204,
       headers: corsHeaders,
     });
   }
 
-  // Solo permitimos POST
+  /*
+   * La función solamente admite POST.
+   */
   if (request.method !== 'POST') {
     return new Response(
       JSON.stringify({
@@ -40,6 +65,24 @@ export default async (request) => {
       }),
       {
         status: 405,
+        headers: corsHeaders,
+      },
+    );
+  }
+
+  /*
+   * Si el POST viene de otro dominio, lo rechazamos.
+   *
+   * Las peticiones sin Origin se permiten porque pueden
+   * proceder de herramientas server-side.
+   */
+  if (origin && !ALLOWED_ORIGINS.includes(origin)) {
+    return new Response(
+      JSON.stringify({
+        error: 'Origin not allowed',
+      }),
+      {
+        status: 403,
         headers: corsHeaders,
       },
     );
@@ -79,7 +122,12 @@ export default async (request) => {
     const result = await resend.emails.send({
       from: 'Open Cells App <onboarding@resend.dev>',
 
-      // El usuario no puede modificar el destinatario
+      /*
+       * Este destinatario se controla exclusivamente
+       * desde backend.
+       *
+       * El usuario no puede modificarlo desde React.
+       */
       to: [RECIPIENT_EMAIL],
 
       subject: `Suggestion from ${name}`,

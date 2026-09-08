@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
 
+const NOTIFICATION_URL =
+  window.location.hostname === 'juan451.github.io'
+    ? 'https://open-cells-task-manager-app.netlify.app/.netlify/functions/send-notification'
+    : '/.netlify/functions/send-notification';
+
 export function NotificationForm() {
   const [form, setForm] = useState({
     name: '',
@@ -28,7 +33,7 @@ export function NotificationForm() {
     setError('');
 
     try {
-      const response = await fetch('/.netlify/functions/send-notification', {
+      const response = await fetch(NOTIFICATION_URL, {
         method: 'POST',
 
         headers: {
@@ -38,10 +43,12 @@ export function NotificationForm() {
         body: JSON.stringify(form),
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error sending suggestion');
+        throw new Error(
+          data.error || `Request failed with status ${response.status}`,
+        );
       }
 
       setStatus('Your suggestion has been sent successfully.');
@@ -51,10 +58,13 @@ export function NotificationForm() {
         email: '',
         message: '',
       });
-    } catch (error) {
-      console.error(error);
+    } catch (requestError) {
+      console.error('Error sending suggestion:', requestError);
 
-      setError('Your suggestion could not be sent. Please try again.');
+      setError(
+        requestError.message ||
+          'Your suggestion could not be sent. Please try again.',
+      );
     } finally {
       setLoading(false);
     }
@@ -63,7 +73,7 @@ export function NotificationForm() {
   return (
     <form className="notification-form" onSubmit={handleSubmit}>
       <div className="notification-form__header">
-        <span className="notification-form__icon">✉️</span>
+        <div className="notification-form__icon">✉️</div>
 
         <div>
           <h2>Suggestions & feedback</h2>
@@ -76,13 +86,12 @@ export function NotificationForm() {
       </div>
 
       <div className="notification-form__field">
-        <label htmlFor="name">Name</label>
+        <label htmlFor="notification-name">Name</label>
 
         <input
-          id="name"
-          name="name"
+          id="notification-name"
           type="text"
-          placeholder="Your name"
+          name="name"
           value={form.name}
           onChange={handleChange}
           required
@@ -90,13 +99,12 @@ export function NotificationForm() {
       </div>
 
       <div className="notification-form__field">
-        <label htmlFor="email">Contact email</label>
+        <label htmlFor="notification-email">Contact email</label>
 
         <input
-          id="email"
-          name="email"
+          id="notification-email"
           type="email"
-          placeholder="you@example.com"
+          name="email"
           value={form.email}
           onChange={handleChange}
           required
@@ -108,12 +116,11 @@ export function NotificationForm() {
       </div>
 
       <div className="notification-form__field">
-        <label htmlFor="message">Message</label>
+        <label htmlFor="notification-message">Message</label>
 
         <textarea
-          id="message"
+          id="notification-message"
           name="message"
-          placeholder="Write your suggestion or question..."
           value={form.message}
           onChange={handleChange}
           required
@@ -126,7 +133,7 @@ export function NotificationForm() {
 
       {status && (
         <div className="notification-form__success" role="status">
-          ✓ {status}
+          {status}
         </div>
       )}
 
