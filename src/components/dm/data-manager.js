@@ -1,8 +1,7 @@
 import { LitElement } from 'lit';
 
 const MEALS_BASE_URL = 'https://www.themealdb.com/api/json/v1/1';
-const TASKS_BASE_URL =
-  'http://opencells-api-env.eba-4u9emsyt.eu-west-2.elasticbeanstalk.com/api/tasks';
+const TASKS_BASE_URL = 'https://d1wohnrfz6jexov.cloudfront.net/api/tasks';
 
 export class DataManager extends LitElement {
   dispatchCustomEvent(eventName, detail = {}) {
