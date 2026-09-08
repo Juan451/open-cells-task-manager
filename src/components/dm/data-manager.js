@@ -1,7 +1,8 @@
 import { LitElement } from 'lit';
 
 const MEALS_BASE_URL = 'https://www.themealdb.com/api/json/v1/1';
-const TASKS_BASE_URL = 'https://d1wohnrfz6jexov.cloudfront.net/api/tasks';
+
+const TASKS_BASE_URL = 'https://d1wohnfz6jexov.cloudfront.net/api/tasks';
 
 export class DataManager extends LitElement {
   dispatchCustomEvent(eventName, detail = {}) {
@@ -146,7 +147,7 @@ export class DataManager extends LitElement {
     }
   }
 
-  // --- Tasks (Spring backend Amazon web services) ---
+  // --- Tasks (Spring backend AWS + CloudFront) ---
 
   async getTasks() {
     try {
