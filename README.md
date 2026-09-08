@@ -1,60 +1,60 @@
-**#** **Open Cells Task Manager**
+# Open Cells Task Manager
 
-A sample web application built with **\*\*Open Cells\*\***, **\*\*Lit\*\***, **\*\*Web Components\*\*** and **\*\*React\*\***.
+A sample web application built with **Open Cells**, **Lit**, **Web Components** and **React**.
 
 The project was created as a learning and demonstration application to explore modern frontend concepts such as routing, reactive components, Shadow DOM, Light DOM, slots, custom events, API integration, React interoperability, serverless functions, testing and continuous deployment.
 
-**---**
+---
 
-**##** **Live Demo**
+## Live Demo
 
 The application is publicly available on GitHub Pages:
 
-https\://juan451.github.io/open-cells-task-manager/
+https://juan451.github.io/open-cells-task-manager/
 
 It is also deployed on Netlify:
 
-https\://open-cells-task-manager-app.netlify.app/
+https://open-cells-task-manager-app.netlify.app/
 
-**###** **GitHub Pages routes**
+### GitHub Pages routes
 
-\- Home
+- Home
 
-https\://juan451.github.io/open-cells-task-manager/#!/
+https://juan451.github.io/open-cells-task-manager/#!/
 
-\- Tasks
+- Tasks
 
-https\://juan451.github.io/open-cells-task-manager/#!/tasks
+https://juan451.github.io/open-cells-task-manager/#!/tasks
 
-\- Meals
+- Meals
 
-https\://juan451.github.io/open-cells-task-manager/#!/meals
+https://juan451.github.io/open-cells-task-manager/#!/meals
 
-\- Notifications
+- Notifications
 
-https\://juan451.github.io/open-cells-task-manager/#!/notifications
+https://juan451.github.io/open-cells-task-manager/#!/notifications
 
-_> The Netlify deployment is the full deployment because it also includes the serverless function used by the notification form._
+> The Netlify deployment is the full deployment because it also includes the serverless function used by the notification form.
 
-**###** **Tasks API**
+### Tasks API
 
 The Tasks page consumes a Spring Boot REST API deployed on AWS.
 
 Production API endpoint:
 
-https\://d1wohnfz6jexov.cloudfront.net/api/tasks
+https://d1wohnfz6jexov.cloudfront.net/api/tasks
 
 CloudFront provides the public HTTPS endpoint used by the frontend, while Elastic Beanstalk hosts the Spring Boot application.
 
-**---**
+---
 
-**#** **Features**
+# Features
 
 The application contains several pages and reusable components that demonstrate different frontend concepts and architectural patterns.
 
-**---**
+---
 
-**##** **Home**
+## Home
 
 The landing page of the application.
 
@@ -62,568 +62,535 @@ It introduces the project and provides access to the different sections.
 
 Main concepts demonstrated:
 
-\- Open Cells routing
+- Open Cells routing
 
-\- Lit components
+- Lit components
 
-\- Light DOM
+- Light DOM
 
-\- Global application styles
+- Global application styles
 
-\- Client-side navigation
+- Client-side navigation
 
 Route:
 
-\`\`\`text
+```text
 
-\#!/
+#!/
 
-\`\`\`
+```
 
-**---**
+---
 
-**##** **Tasks**
+## Tasks
 
-A simple task manager built with **\*\*Lit\*\***.
+A simple task manager built with **Lit**.
 
 Users can:
 
-\- View tasks
+- View tasks
 
-\- Mark tasks as completed
+- Mark tasks as completed
 
-\- Undo completed tasks
+- Undo completed tasks
 
-Task data is provided by a **\*\*Spring Boot REST API\*\*** deployed on **\*\*AWS Elastic Beanstalk\*\*** and exposed to the browser through **\*\*Amazon CloudFront\*\***.
+Task data is provided by a **Spring Boot REST API** deployed on **AWS Elastic Beanstalk** and exposed to the browser through **Amazon CloudFront**.
 
 The frontend uses:
 
-\`GET /api/tasks\`
+`GET /api/tasks`
 
 to load the task list and:
 
-\`PATCH /api/tasks/{id}/toggle\`
+`PATCH /api/tasks/{id}/toggle`
 
 to change the completed state of a task.
 
 Production flow:
 
-\`\`\`text
+```text
 
 GitHub Pages (HTTPS)
 
-    │
+│
 
-    │ fetch()
+│ fetch()
 
-    ▼
+▼
 
 Amazon CloudFront (HTTPS)
 
-    │
+│
 
-    ▼
+▼
 
 AWS Elastic Beanstalk
 
-    │
+│
 
-    ▼
+▼
 
 nginx
 
-    │
+│
 
-    ▼
+▼
 
 Spring Boot / Java 21
 
-    │
+│
 
-    ▼
+▼
 
 /api/tasks
 
-\`\`\`
+```
 
 Each task is rendered using a reusable Web Component:
 
-\`\`\`html
-
-\<task-card>\</task-card>
-
-\`\`\`
+```html
+<task-card></task-card>
+```
 
 The page passes a task object to the child component using a JavaScript property:
 
-\`\`\`js
+```js
 
-\<task-card .task=${task}>\</task-card>
+<task-card .task=${task}></task-card>
 
-\`\`\`
+```
 
 The child component communicates with the parent using a custom event:
 
-\`\`\`js
-
+```js
 new CustomEvent('toggle-task', {
-
-detail: {
-
+  detail: {
     id: this.task.id,
+  },
 
-},
+  bubbles: true,
 
-bubbles: true,
-
-composed: true,
-
+  composed: true,
 });
-
-\`\`\`
+```
 
 The communication flow is:
 
-\`\`\`text
+```text
 
 TasksPage
 
-    │
+│
 
-    │ .task=${task}
+│ .task=${task}
 
-    ▼
+▼
 
 TaskCard
 
-    │
+│
 
-    │ CustomEvent
+│ CustomEvent
 
-    ▼
+▼
 
 TasksPage
 
-    │
+│
 
-    ▼
+▼
 
 Update state
 
-    │
+│
 
-    ▼
+▼
 
 Lit re-renders
 
-\`\`\`
+```
 
 Main concepts demonstrated:
 
-\- Lit reactive properties
+- Lit reactive properties
 
-\- Web Components
+- Web Components
 
-\- Shadow DOM
+- Shadow DOM
 
-\- Custom Events
+- Custom Events
 
-\- \`bubbles\`
+- `bubbles`
 
-\- \`composed\`
+- `composed`
 
-\- Parent → child communication
+- Parent → child communication
 
-\- Child → parent communication
+- Child → parent communication
 
-\- Immutable state updates
+- Immutable state updates
 
-\- Reusable components
+- Reusable components
 
 Route:
 
-\`\`\`text
+```text
 
-\#!/tasks
+#!/tasks
 
-\`\`\`
+```
 
-**---**
+---
 
-**##** **Meals**
+## Meals
 
-A food search page connected to the public **\*\*TheMealDB API\*\***.
+A food search page connected to the public **TheMealDB API**.
 
 API documentation:
 
-https\://www\.themealdb.com/api.php
+https://www.themealdb.com/api.php
 
 Users can search for meals and view information such as:
 
-\- Meal name
+- Meal name
 
-\- Image
+- Image
 
-\- Category
+- Category
 
-\- Country / area
+- Country / area
 
-\- Ingredients
+- Ingredients
 
-\- Measurements
+- Measurements
 
-\- Cooking instructions
+- Cooking instructions
 
 Example search:
 
-\`\`\`text
+```text
 
 chicken
 
-\`\`\`
+```
 
 The page does not call the API directly.
 
 Instead, all HTTP communication is delegated to a reusable:
 
-\`\`\`html
-
-\<data-manager>\</data-manager>
-
-\`\`\`
+```html
+<data-manager></data-manager>
+```
 
 component.
 
 Architecture:
 
-\`\`\`text
+```text
 
 MealsPage
 
-    │
+│
 
-    │ searchMeals()
+│ searchMeals()
 
-    ▼
+▼
 
 DataManager
 
-    │
+│
 
-    │ fetch()
+│ fetch()
 
-    ▼
+▼
 
 TheMealDB API
 
-    │
+│
 
-    │ JSON
+│ JSON
 
-    ▼
+▼
 
 DataManager
 
-    │
+│
 
-    │ CustomEvent
+│ CustomEvent
 
-    ▼
+▼
 
 MealsPage
 
-    │
+│
 
-    ▼
+▼
 
 Render results
 
-\`\`\`
+```
 
 Main concepts demonstrated:
 
-\- REST API integration
+- REST API integration
 
-\- Fetch API
+- Fetch API
 
-\- Async JavaScript
+- Async JavaScript
 
-\- Loading states
+- Loading states
 
-\- Error handling
+- Error handling
 
-\- Data Manager pattern
+- Data Manager pattern
 
-\- Separation of concerns
+- Separation of concerns
 
-\- Custom Events
+- Custom Events
 
 Route:
 
-\`\`\`text
+```text
 
-\#!/meals
+#!/meals
 
-\`\`\`
+```
 
-**---**
+---
 
-**##** **Meal Detail**
+## Meal Detail
 
 Clicking on a meal opens a reusable:
 
-\`\`\`html
-
-\<meal-detail>\</meal-detail>
-
-\`\`\`
+```html
+<meal-detail></meal-detail>
+```
 
 component.
 
-This component demonstrates the relationship between **\*\*Shadow DOM\*\***, **\*\*Light DOM\*\*** and **\*\*slots\*\***.
+This component demonstrates the relationship between **Shadow DOM**, **Light DOM** and **slots**.
 
 Example usage:
 
-\`\`\`html
+```html
+<meal-detail>
+  <img slot="image" src="meal.jpg" alt="Meal" />
 
-\<meal-detail>
+  <h2 slot="title">Chicken Curry</h2>
 
-\<img slot="image" src="meal.jpg" alt="Meal" />
-
-\<h2 slot="title">Chicken Curry\</h2>
-
-\<ul slot="ingredients">
-
+  <ul slot="ingredients">
     ...
+  </ul>
 
-\</ul>
-
-\<p slot="instructions">...\</p>
-
-\</meal-detail>
-
-\`\`\`
+  <p slot="instructions">...</p>
+</meal-detail>
+```
 
 Inside the component:
 
-\`\`\`html
+```html
+<slot name="image"></slot>
 
-\<slot name="image">\</slot>
+<slot name="title"></slot>
 
-\<slot name="title">\</slot>
+<slot name="ingredients"></slot>
 
-\<slot name="ingredients">\</slot>
-
-\<slot name="instructions">\</slot>
-
-\`\`\`
+<slot name="instructions"></slot>
+```
 
 Conceptually:
 
-\`\`\`text
+```text
 
-\<meal-detail>
+<meal-detail>
 
-    LIGHT DOM
+LIGHT DOM
 
-    ├── \<img slot="image">
+├── \<img slot="image">
 
-    ├── \<h2 slot="title">
+├── \<h2 slot="title">
 
-    ├── \<ul slot="ingredients">
+├── \<ul slot="ingredients">
 
-    └── \<p slot="instructions">
+└── \<p slot="instructions">
 
-              ↓
+          ↓
 
-          SLOT DISTRIBUTION
+      SLOT DISTRIBUTION
 
-              ↓
+          ↓
 
-    SHADOW DOM
+SHADOW DOM
 
-    ├── \<slot name="image">
+├── \<slot name="image">
 
-    ├── \<slot name="title">
+├── \<slot name="title">
 
-    ├── \<slot name="ingredients">
+├── \<slot name="ingredients">
 
-    └── \<slot name="instructions">
+└── \<slot name="instructions">
 
-\</meal-detail>
+</meal-detail>
 
-\`\`\`
+```
 
 Main concepts demonstrated:
 
-\- Shadow DOM
+- Shadow DOM
 
-\- Light DOM
+- Light DOM
 
-\- Slots
+- Slots
 
-\- Named slots
+- Named slots
 
-\- \`::slotted\`
+- `::slotted`
 
-\- Style encapsulation
+- Style encapsulation
 
-\- Reusable UI components
+- Reusable UI components
 
-**---**
+---
 
-**##** **Notifications**
+## Notifications
 
-The Notifications page demonstrates how a **\*\*React component can be integrated inside an Open Cells / Lit application\*\***.
+The Notifications page demonstrates how a **React component can be integrated inside an Open Cells / Lit application**.
 
 The page acts as a suggestions and feedback form.
 
 Users can send:
 
-\- Their name
+- Their name
 
-\- Their contact email
+- Their contact email
 
-\- A suggestion, question or feedback message
+- A suggestion, question or feedback message
 
 The recipient of the notification is controlled by the backend and cannot be modified from the frontend.
 
 The form is implemented using React:
 
-\`\`\`jsx
-
+```jsx
 useState();
-
-\`\`\`
+```
 
 and exposed to the rest of the application as a Web Component:
 
-\`\`\`html
-
-\<react-notification-form> \</react-notification-form>
-
-\`\`\`
+```html
+<react-notification-form> </react-notification-form>
+```
 
 Architecture:
 
-\`\`\`text
+```text
 
 Open Cells
 
-    │
+│
 
-    ▼
+▼
 
 NotificationsPage
 
-    │
+│
 
-    ▼
+▼
 
-\<react-notification-form>
+<react-notification-form>
 
-    │
+│
 
-    ▼
+▼
 
 React
 
-    │
+│
 
-    │ POST
+│ POST
 
-    ▼
+▼
 
 Netlify Function
 
-    │
+│
 
-    ▼
+▼
 
 Resend
 
-    │
+│
 
-    ▼
+▼
 
 Email notification
 
-\`\`\`
+```
 
 Main concepts demonstrated:
 
-\- React
+- React
 
-\- \`useState\`
+- `useState`
 
-\- Controlled forms
+- Controlled forms
 
-\- React interoperability
+- React interoperability
 
-\- Web Components
+- Web Components
 
-\- Netlify Functions
+- Netlify Functions
 
-\- Serverless architecture
+- Serverless architecture
 
-\- Environment variables
+- Environment variables
 
-\- Resend email API
+- Resend email API
 
-\- Separation between frontend and backend responsibilities
+- Separation between frontend and backend responsibilities
 
 Route:
 
-\`\`\`text
+```text
 
-\#!/notifications
+#!/notifications
 
-\`\`\`
+```
 
 The complete notification flow is available in the Netlify deployment:
 
-https\://open-cells-task-manager-app.netlify.app/#!/notifications
+https://open-cells-task-manager-app.netlify.app/#!/notifications
 
-**---**
+---
 
-**#** **Data Manager**
+# Data Manager
 
 The application centralizes API communication in a Data Manager component.
 
 The Data Manager currently communicates with two external services:
 
-\- **\*\*TheMealDB\*\*** for meal data.
+- **TheMealDB** for meal data.
 
-\- **\*\*Spring Boot on AWS\*\*** for task data.
+- **Spring Boot on AWS** for task data.
 
 The production Tasks base URL is:
 
-\`\`\`js
-
-const TASKS_BASE_URL =
-'https\://d1wohnfz6jexov.cloudfront.net/api/tasks';
-
-\`\`\`
+```js
+const TASKS_BASE_URL = 'https://d1wohnfz6jexov.cloudfront.net/api/tasks';
+```
 
 Example:
 
-\`\`\`html
-
-\<data-manager
-
-id="dataManager"
-
-@search-meals-success="${this.\_onSearchMealsSuccess}"
-
-@search-meals-error="${this.\_onSearchMealsError}"
-
-\>\</data-manager>
-
-\`\`\`
+```html
+<data-manager
+  id="dataManager"
+  @search-meals-success="${this._onSearchMealsSuccess}"
+  @search-meals-error="${this._onSearchMealsError}"
+></data-manager>
+```
 
 Instead of putting networking logic directly inside a page:
 
-\`\`\`text
+```text
 
 MealsPage
 
@@ -635,11 +602,11 @@ MealsPage
 
 └── user events
 
-\`\`\`
+```
 
 the Data Manager handles:
 
-\`\`\`text
+```text
 
 DataManager
 
@@ -653,81 +620,77 @@ DataManager
 
 └── API response events
 
-\`\`\`
+```
 
 This improves:
 
-\- Separation of concerns
+- Separation of concerns
 
-\- Maintainability
+- Maintainability
 
-\- Reusability
+- Reusability
 
-\- Testability
+- Testability
 
-**---**
+---
 
-**#** **Open Cells Lifecycle**
+# Open Cells Lifecycle
 
 Some pages use:
 
-\`\`\`js
-
+```js
 PageMixin;
-
-\`\`\`
+```
 
 from Open Cells.
 
 Example:
 
-\`\`\`js
+```js
 
-export class MealsPage _extends_ PageMixin(LitElement) {
+export class MealsPage extends PageMixin(LitElement) {
 
-\`\`\`
+```
 
 This provides page-specific lifecycle methods such as:
 
-\`\`\`js
+```js
 
 onPageEnter() {
 
-_// Executed when entering the page_
+// Executed when entering the page
 
 }
 
 onPageLeave() {
 
-_// Executed when leaving the page_
+// Executed when leaving the page
 
 }
 
-\`\`\`
+```
 
 For example, the Meals page can clear its search state when the user navigates away.
 
 This is different from the standard Web Components lifecycle:
 
-\`\`\`js
-
+```js
 connectedCallback();
 
 disconnectedCallback();
+```
 
-\`\`\`
+Open Cells may keep pages mounted while only changing which page is active, so `onPageEnter()` and `onPageLeave()` are useful for page-level lifecycle management.
 
-Open Cells may keep pages mounted while only changing which page is active, so \`onPageEnter()\` and \`onPageLeave()\` are useful for page-level lifecycle management.
+---
 
-**---**
+# Routing
 
-**#** **Routing**
-
-Routing is managed by **\*\*Open Cells\*\***.
+Routing is managed by **Open Cells**.
 
 Example route:
 
-\`\`\`js
+```js
 
 {
 
@@ -737,83 +700,79 @@ name: 'meals',
 
 component: 'meals-page',
 
-action: _async_ () => {
+action: async () => {
 
-_await_ import(
+await import(
 
-      '../pages/meals/meals-page.js'
+  '../pages/meals/meals-page.js'
 
-    );
+);
 
 },
 
 }
 
-\`\`\`
+```
 
 Navigation can then be performed with:
 
-\`\`\`js
-
+```js
 this.controller.navigate('meals');
-
-\`\`\`
+```
 
 The project uses hash-based routes:
 
-\`\`\`text
+```text
 
-\#!/
+#!/
 
-\#!/tasks
+#!/tasks
 
-\#!/meals
+#!/meals
 
-\#!/notifications
+#!/notifications
 
-\`\`\`
+```
 
 This is useful for static hosting environments such as GitHub Pages because route navigation is handled by the browser.
 
-**---**
+---
 
-**#** **Application Shell**
+# Application Shell
 
 The main application layout is implemented by:
 
-\`\`\`html
-
-\<app-index>\</app-index>
-
-\`\`\`
+```html
+<app-index></app-index>
+```
 
 It contains:
 
-\- Header
+- Header
 
-\- Application logo
+- Application logo
 
-\- Documentation links
+- Documentation links
 
-\- Expandable sidebar
+- Expandable sidebar
 
-\- Page navigation
+- Page navigation
 
-\- Main page container
+- Main page container
 
 The sidebar provides navigation between the application pages.
 
-**---**
+---
 
-**#** **Styling**
+# Styling
 
 The application uses two styling strategies.
 
-**##** **Global page styles**
+## Global page styles
 
 Pages use global CSS files:
 
-\`\`\`text
+```text
 
 src/css/
 
@@ -829,23 +788,23 @@ src/css/
 
 └── notifications.css
 
-\`\`\`
+```
 
 These pages render using Light DOM:
 
-\`\`\`js
+```js
 
 createRenderRoot() {
 
-_return_ this;
+return this;
 
 }
 
-\`\`\`
+```
 
 This allows global selectors such as:
 
-\`\`\`css
+```css
 
 meals-page .page-header {
 
@@ -853,19 +812,19 @@ meals-page .page-header {
 
 }
 
-\`\`\`
+```
 
 to style page content.
 
-**---**
+---
 
-**##** **Encapsulated component styles**
+## Encapsulated component styles
 
 Reusable Lit components use Shadow DOM and encapsulated styles.
 
 Example:
 
-\`\`\`text
+```text
 
 task-card/
 
@@ -873,173 +832,169 @@ task-card/
 
 └── task-card.css.js
 
-\`\`\`
+```
 
 Inside the component:
 
-\`\`\`js
+```js
 
 static styles = styles;
 
-\`\`\`
+```
 
 This prevents global styles from accidentally modifying internal component design.
 
-**---**
+---
 
-**#** **CSS Custom Properties**
+# CSS Custom Properties
 
 The application uses CSS Custom Properties as design tokens.
 
 Example:
 
-\`\`\`css
+```css
+:root {
+  --color-aqua: #2dcccd;
 
-\:root {
+  --color-blue-dark: #043263;
 
-\--color-aqua: #2dcccd;
+  --color-blue-light: #5bbeff;
 
-\--color-blue-dark: #043263;
+  --color-blue: #1973b8;
 
-\--color-blue-light: #5bbeff;
+  --color-core-blue: #004481;
 
-\--color-blue: #1973b8;
+  --color-core-light: #d4edfc;
 
-\--color-core-blue: #004481;
+  --color-grey-light: #f4f4f4;
 
-\--color-core-light: #d4edfc;
+  --color-grey-mid: #d9d9d9;
 
-\--color-grey-light: #f4f4f4;
+  --color-grey: #666666;
 
-\--color-grey-mid: #d9d9d9;
+  --color-navy: #072146;
 
-\--color-grey: #666666;
+  --color-red: #d44b50;
 
-\--color-navy: #072146;
-
-\--color-red: #d44b50;
-
-\--color-white: #ffffff;
-
+  --color-white: #ffffff;
 }
-
-\`\`\`
+```
 
 CSS Custom Properties can be inherited by components even when they use Shadow DOM.
 
 This provides controlled theming while maintaining component encapsulation.
 
-**---**
+---
 
-**#** **Technologies**
+# Technologies
 
-**##** **Frontend**
+## Frontend
 
-\- JavaScript
+- JavaScript
 
-\- HTML
+- HTML
 
-\- CSS
+- CSS
 
-\- Web Components
+- Web Components
 
-\- Lit 3
+- Lit 3
 
-\- Open Cells
+- Open Cells
 
-\- React
+- React
 
-\- React DOM
+- React DOM
 
-**##** **Architecture**
+## Architecture
 
-\- Single Page Application
+- Single Page Application
 
-\- Component-based architecture
+- Component-based architecture
 
-\- Data Manager pattern
+- Data Manager pattern
 
-\- Client-side routing
+- Client-side routing
 
-\- Custom Events
+- Custom Events
 
-\- Shadow DOM
+- Shadow DOM
 
-\- Light DOM
+- Light DOM
 
-\- Slots
+- Slots
 
-\- Reactive properties
+- Reactive properties
 
-**##** **API**
+## API
 
-\- TheMealDB
+- TheMealDB
 
-\- Fetch API
+- Fetch API
 
-\- Spring Boot REST API
+- Spring Boot REST API
 
-**##** **Backend / Serverless**
+## Backend / Serverless
 
-\- Java 21
+- Java 21
 
-\- Spring Boot
+- Spring Boot
 
-\- Maven
+- Maven
 
-\- Netlify Functions
+- Netlify Functions
 
-\- Node.js
+- Node.js
 
-\- Resend
+- Resend
 
-**##** **Build tools**
+## Build tools
 
-\- Vite
+- Vite
 
-\- npm
+- npm
 
-**##** **Testing**
+## Testing
 
-\- Web Test Runner
+- Web Test Runner
 
-\- Open WC Testing
+- Open WC Testing
 
-\- Sinon
+- Sinon
 
-\- Chai assertions
+- Chai assertions
 
-**##** **Deployment**
+## Deployment
 
-\- GitHub
+- GitHub
 
-\- GitHub Actions
+- GitHub Actions
 
-\- GitHub Pages
+- GitHub Pages
 
-\- Netlify
+- Netlify
 
-\- AWS Elastic Beanstalk
+- AWS Elastic Beanstalk
 
-\- Amazon EC2
+- Amazon EC2
 
-\- Amazon CloudFront
+- Amazon CloudFront
 
-\- Amazon Linux 2023
+- Amazon Linux 2023
 
-\- Amazon Corretto 21
+- Amazon Corretto 21
 
-\- nginx
+- nginx
 
-\- Continuous Deployment
+- Continuous Deployment
 
-**---**
+---
 
-**#** **Project Structure**
+# Project Structure
 
 Simplified project structure:
 
-\`\`\`text
+```text
 
 open-cells-task-manager/
 
@@ -1047,93 +1002,93 @@ open-cells-task-manager/
 
 ├── .github/
 
-│ └── workflows/
+│   └── workflows/
 
-│ └── deploy-pages.yml
+│       └── deploy-pages.yml
 
 │
 
 ├── functions/
 
-│ └── send-notification.mjs
+│   └── send-notification.mjs
 
 │
 
 ├── src/
 
-│ │
+│   │
 
-│ ├── components/
+│   ├── components/
 
-│ │ │
+│   │   │
 
-│ │ ├── app-index/
+│   │   ├── app-index/
 
-│ │ │
+│   │   │
 
-│ │ ├── dm/
+│   │   ├── dm/
 
-│ │ │ └── data-manager.js
+│   │   │   └── data-manager.js
 
-│ │ │
+│   │   │
 
-│ │ ├── meal-detail/
+│   │   ├── meal-detail/
 
-│ │ │ ├── meal-detail.js
+│   │   │   ├── meal-detail.js
 
-│ │ │ └── meal-detail.css.js
+│   │   │   └── meal-detail.css.js
 
-│ │ │
+│   │   │
 
-│ │ ├── task-card/
+│   │   ├── task-card/
 
-│ │ │ ├── task-card.js
+│   │   │   ├── task-card.js
 
-│ │ │ └── task-card.css.js
+│   │   │   └── task-card.css.js
 
-│ │ │
+│   │   │
 
-│ │ └── react-notification-form/
+│   │   └── react-notification-form/
 
-│ │ ├── notification-form.jsx
+│   │       ├── notification-form.jsx
 
-│ │ └── react-notification-form.js
+│   │       └── react-notification-form.js
 
-│ │
+│   │
 
-│ ├── pages/
+│   ├── pages/
 
-│ │ ├── home/
+│   │   ├── home/
 
-│ │ ├── tasks/
+│   │   ├── tasks/
 
-│ │ ├── meals/
+│   │   ├── meals/
 
-│ │ ├── notifications/
+│   │   ├── notifications/
 
-│ │ └── second/
+│   │   └── second/
 
-│ │
+│   │
 
-│ ├── router/
+│   ├── router/
 
-│ │ └── routes.js
+│   │   └── routes.js
 
-│ │
+│   │
 
-│ └── css/
+│   └── css/
 
-│ ├── main.css
+│       ├── main.css
 
-│ ├── home.css
+│       ├── home.css
 
-│ ├── second.css
+│       ├── second.css
 
-│ ├── tasks.css
+│       ├── tasks.css
 
-│ ├── meals.css
+│       ├── meals.css
 
-│ └── notifications.css
+│       └── notifications.css
 
 │
 
@@ -1153,87 +1108,87 @@ open-cells-task-manager/
 
 └── README.md
 
-\`\`\`
+```
 
-**---**
+---
 
-**#** **Getting Started**
+# Getting Started
 
 Clone the repository:
 
-\`\`\`bash
+```bash
 
-git clone https\://github.com/Juan451/open-cells-task-manager.git
+git clone https://github.com/Juan451/open-cells-task-manager.git
 
-\`\`\`
+```
 
 Enter the project:
 
-\`\`\`bash
+```bash
 
 cd open-cells-task-manager
 
-\`\`\`
+```
 
 Install dependencies:
 
-\`\`\`bash
+```bash
 
 npm install
 
-\`\`\`
+```
 
 Start the development server:
 
-\`\`\`bash
+```bash
 
 npm run dev
 
-\`\`\`
+```
 
 The application will normally be available at:
 
-\`\`\`text
+```text
 
-http\://localhost:5173
+http://localhost:5173
 
-\`\`\`
+```
 
-**---**
+---
 
-**#** **Local Development with Netlify**
+# Local Development with Netlify
 
 The notification feature uses a Netlify Function.
 
 To run the complete application locally, including serverless functions:
 
-\`\`\`bash
+```bash
 
 netlify dev
 
-\`\`\`
+```
 
 Using only:
 
-\`\`\`bash
+```bash
 
 npm run dev
 
-\`\`\`
+```
 
 starts the Vite frontend but does not provide the Netlify Function environment.
 
-**---**
+---
 
-**#** **Environment Variables**
+# Environment Variables
 
 The email notification service requires:
 
-\`\`\`text
+```text
 
 RESEND_API_KEY
 
-\`\`\`
+```
 
 This variable is configured securely in Netlify.
 
@@ -1241,41 +1196,39 @@ The API key must never be committed to GitHub.
 
 Example usage:
 
-\`\`\`js
-
-_const_ apiKey = process.env.RESEND_API_KEY;
-
-\`\`\`
+```js
+const apiKey = process.env.RESEND_API_KEY;
+```
 
 The notification recipient is controlled on the backend so users cannot modify the destination address from the frontend.
 
-**---**
+---
 
-**#** **Scripts**
+# Scripts
 
-\| Script | Description |
+| Script | Description |
 
-\| ----------------------- | ------------------------------------ |
+| ----------------------- | ------------------------------------ |
 
-\| \`npm run dev\` | Start the Vite development server |
+| `npm run dev` | Start the Vite development server |
 
-\| \`npm run build\` | Build the application for production |
+| `npm run build` | Build the application for production |
 
-\| \`npm run preview\` | Preview the production build |
+| `npm run preview` | Preview the production build |
 
-\| \`npm test\` | Run the test suite |
+| `npm test` | Run the test suite |
 
-\| \`npm run test\:watch\` | Run tests continuously in watch mode |
+| `npm run test:watch` | Run tests continuously in watch mode |
 
-\| \`npm run test\:coverage\` | Run tests and generate coverage |
+| `npm run test:coverage` | Run tests and generate coverage |
 
-**---**
+---
 
-**#** **Testing**
+# Testing
 
 The project uses:
 
-\`\`\`text
+```text
 
 @web/test-runner
 
@@ -1283,99 +1236,97 @@ The project uses:
 
 sinon
 
-\`\`\`
+```
 
 Example:
 
-\`\`\`js
-
+```js
 import { expect, fixture, html } from '@open-wc/testing';
 
 import sinon from 'sinon';
-
-\`\`\`
+```
 
 Tests can verify:
 
-\- Component rendering
+- Component rendering
 
-\- Lit reactive properties
+- Lit reactive properties
 
-\- Shadow DOM content
+- Shadow DOM content
 
-\- Custom Events
+- Custom Events
 
-\- \`bubbles\`
+- `bubbles`
 
-\- \`composed\`
+- `composed`
 
-\- API calls
+- API calls
 
-\- \`fetch\`
+- `fetch`
 
-\- Successful API responses
+- Successful API responses
 
-\- API errors
+- API errors
 
-\- Page lifecycle
+- Page lifecycle
 
-\- Component interaction
+- Component interaction
 
-\- React integration
+- React integration
 
 Run tests:
 
-\`\`\`bash
+```bash
 
 npm test
 
-\`\`\`
+```
 
 Run continuously:
 
-\`\`\`bash
+```bash
 
-npm run test\:watch
+npm run test:watch
 
-\`\`\`
+```
 
 Generate coverage:
 
-\`\`\`bash
+```bash
 
-npm run test\:coverage
+npm run test:coverage
 
-\`\`\`
+```
 
-**---**
+---
 
-**#** **Production Build**
+# Production Build
 
 Create a production build with:
 
-\`\`\`bash
+```bash
 
 npm run build
 
-\`\`\`
+```
 
 Vite generates the production bundle inside:
 
-\`\`\`text
+```text
 
 dist/
 
-\`\`\`
+```
 
-**---**
+---
 
-**#** **Vite Configuration**
+# Vite Configuration
 
 The project supports both Netlify and GitHub Pages deployments.
 
 Example:
 
-\`\`\`js
+```js
 
 import { defineConfig } from 'vite';
 
@@ -1383,15 +1334,15 @@ export default defineConfig({
 
 base:
 
-    process.env.GITHUB\_ACTIONS === 'true' ? '/open-cells-task-manager/' : '/',
+process.env.GITHUB\_ACTIONS === 'true' ? '/open-cells-task-manager/' : '/',
 
 });
 
-\`\`\`
+```
 
 This means:
 
-\`\`\`text
+```text
 
 Local development
 
@@ -1405,103 +1356,103 @@ GitHub Pages
 
 → /open-cells-task-manager/
 
-\`\`\`
+```
 
-**---**
+---
 
-**#** **Deployment**
+# Deployment
 
-The frontend is deployed using both **\*\*GitHub Pages\*\*** and **\*\*Netlify\*\***.
+The frontend is deployed using both **GitHub Pages** and **Netlify**.
 
-The Tasks backend is deployed separately on **\*\*AWS Elastic Beanstalk\*\*** and exposed over HTTPS through **\*\*Amazon CloudFront\*\***.
+The Tasks backend is deployed separately on **AWS Elastic Beanstalk** and exposed over HTTPS through **Amazon CloudFront**.
 
-**---**
+---
 
-**##** **GitHub Pages**
+## GitHub Pages
 
 GitHub Pages deployment:
 
-https\://juan451.github.io/open-cells-task-manager/
+https://juan451.github.io/open-cells-task-manager/
 
-Deployment is automated using **\*\*GitHub Actions\*\***.
+Deployment is automated using **GitHub Actions**.
 
 Workflow:
 
-\`\`\`text
+```text
 
 .github/
 
 └── workflows/
 
-    └── deploy-pages.yml
+└── deploy-pages.yml
 
-\`\`\`
+```
 
 Deployment flow:
 
-\`\`\`text
+```text
 
 git push
 
-    ↓
+↓
 
 GitHub
 
-    ↓
+↓
 
 GitHub Actions
 
-    ↓
+↓
 
 npm ci
 
-    ↓
+↓
 
 npm run build
 
-    ↓
+↓
 
 dist/
 
-    ↓
+↓
 
 GitHub Pages
 
-\`\`\`
+```
 
 Each push to the configured branch can automatically trigger a new deployment.
 
-**---**
+---
 
-**##** **Netlify**
+## Netlify
 
 Netlify deployment:
 
-https\://open-cells-task-manager-app.netlify.app/
+https://open-cells-task-manager-app.netlify.app/
 
 Netlify provides:
 
-\- Static hosting
+- Static hosting
 
-\- Continuous deployment
+- Continuous deployment
 
-\- Netlify Functions
+- Netlify Functions
 
-\- Environment variables
+- Environment variables
 
-\- Serverless backend functionality
+- Serverless backend functionality
 
 Configuration is stored in:
 
-\`\`\`text
+```text
 
 netlify.toml
 
-\`\`\`
+```
 
 Example:
 
-\`\`\`toml
+```toml
 
 [build]
 
@@ -1517,133 +1468,133 @@ directory = "functions"
 
 NODE_VERSION = "22"
 
-\`\`\`
+```
 
 Netlify deployment flow:
 
-\`\`\`text
+```text
 
 Local development
 
-      ↓
+  ↓
 
 git commit
 
-      ↓
+  ↓
 
 git push
 
-      ↓
+  ↓
 
 GitHub
 
-      ↓
+  ↓
 
 Netlify
 
-      ↓
+  ↓
 
 npm run build
 
-      ↓
+  ↓
 
 Deploy
 
-\`\`\`
+```
 
-**---**
+---
 
-**##** **AWS Spring Boot Backend**
+## AWS Spring Boot Backend
 
 The Tasks feature uses a Java Spring Boot backend deployed on AWS.
 
-**###** **Elastic Beanstalk**
+### Elastic Beanstalk
 
 The Spring Boot application is packaged as an executable JAR:
 
-\`\`\`bash
+```bash
 
 ./mvnw clean package
 
-\`\`\`
+```
 
 The generated artifact is:
 
-\`\`\`text
+```text
 
 target/demo-0.0.1-SNAPSHOT.jar
 
-\`\`\`
+```
 
 It can be tested locally before deployment with:
 
-\`\`\`bash
+```bash
 
 java -jar target/demo-0.0.1-SNAPSHOT.jar
 
-\`\`\`
+```
 
 The Elastic Beanstalk environment uses:
 
-\- Platform: Java
+- Platform: Java
 
-\- Platform branch: Corretto 21 running on 64bit Amazon Linux 2023
+- Platform branch: Corretto 21 running on 64bit Amazon Linux 2023
 
-\- Environment tier: Web server
+- Environment tier: Web server
 
-\- Environment type: Single instance
+- Environment type: Single instance
 
-\- EC2 instance type: \`t3.micro\`
+- EC2 instance type: `t3.micro`
 
-\- Architecture: \`x86_64\`
+- Architecture: `x86_64`
 
-\- Proxy server: nginx
+- Proxy server: nginx
 
-\- Deployment policy: All at once
+- Deployment policy: All at once
 
-\- Managed platform updates: Disabled
+- Managed platform updates: Disabled
 
 The Spring Boot process is configured with the Elastic Beanstalk environment property:
 
-\`\`\`text
+```text
 
 SERVER_PORT=5000
 
-\`\`\`
+```
 
 This allows nginx to forward requests to the Spring Boot application.
 
 The direct Elastic Beanstalk origin is:
 
-\`\`\`text
+```text
 
-http\://opencells-api-env.eba-4u9emsyt.eu-west-2.elasticbeanstalk.com
+http://opencells-api-env.eba-4u9emsyt.eu-west-2.elasticbeanstalk.com
 
-\`\`\`
+```
 
 and the Tasks endpoint is:
 
-\`\`\`text
+```text
 
-http\://opencells-api-env.eba-4u9emsyt.eu-west-2.elasticbeanstalk.com/api/tasks
+http://opencells-api-env.eba-4u9emsyt.eu-west-2.elasticbeanstalk.com/api/tasks
 
-\`\`\`
+```
 
 The direct HTTP endpoint is useful for testing the backend, but it is not used by the GitHub Pages frontend.
 
-**###** **Why CloudFront is required**
+### Why CloudFront is required
 
 GitHub Pages serves the application through HTTPS:
 
-\`\`\`text
+```text
 
-https\://juan451.github.io
+https://juan451.github.io
 
-\`\`\`
+```
 
-Calling the Elastic Beanstalk HTTP endpoint directly from an HTTPS page causes the browser to block the request as **Mixed Content**:
+Calling the Elastic Beanstalk HTTP endpoint directly from an HTTPS page causes the browser to block the request as Mixed Content:
 
-\`\`\`text
+```text
 
 HTTPS frontend
 ↓
@@ -1651,274 +1602,267 @@ HTTP backend
 ↓
 Blocked by the browser
 
-\`\`\`
+```
 
 Amazon CloudFront is therefore used as an HTTPS layer in front of Elastic Beanstalk.
 
 Production architecture:
 
-\`\`\`text
+```text
 
 Browser
 
-    │
+│
 
-    │ HTTPS
+│ HTTPS
 
-    ▼
+▼
 
 GitHub Pages
 
-https\://juan451.github.io/open-cells-task-manager/
+https://juan451.github.io/open-cells-task-manager/
 
-    │
+│
 
-    │ fetch HTTPS
+│ fetch HTTPS
 
-    ▼
+▼
 
 Amazon CloudFront
 
-https\://d1wohnfz6jexov.cloudfront.net
+https://d1wohnfz6jexov.cloudfront.net
 
-    │
+│
 
-    │ HTTP to origin
+│ HTTP to origin
 
-    ▼
+▼
 
 AWS Elastic Beanstalk
 
-    │
+│
 
-    ▼
+▼
 
 nginx
 
-    │
+│
 
-    ▼
+▼
 
 Spring Boot :5000
 
-    │
+│
 
-    ▼
+▼
 
 /api/tasks
 
-\`\`\`
+```
 
 CloudFront is configured with:
 
-\- Origin type: Custom origin
+- Origin type: Custom origin
 
-\- Origin: Elastic Beanstalk environment domain
+- Origin: Elastic Beanstalk environment domain
 
-\- Origin protocol: HTTP
+- Origin protocol: HTTP
 
-\- Viewer protocol policy: Redirect HTTP to HTTPS
+- Viewer protocol policy: Redirect HTTP to HTTPS
 
-\- Allowed methods: GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE
+- Allowed methods: GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE
 
-\- Cache policy: \`CachingDisabled\`
+- Cache policy: `CachingDisabled`
 
-\- Origin request policy: \`AllViewer\`
+- Origin request policy: `AllViewer`
 
-\- Response headers policy: Not configured
+- Response headers policy: Not configured
 
-\- AWS WAF: Disabled for this demonstration environment
+- AWS WAF: Disabled for this demonstration environment
 
 The public production Tasks API is:
 
-\`\`\`text
+```text
 
-https\://d1wohnfz6jexov.cloudfront.net/api/tasks
+https://d1wohnfz6jexov.cloudfront.net/api/tasks
 
-\`\`\`
+```
 
 The frontend Data Manager uses:
 
-\`\`\`js
+```js
+const TASKS_BASE_URL = 'https://d1wohnfz6jexov.cloudfront.net/api/tasks';
+```
 
-const TASKS_BASE_URL =
-'https\://d1wohnfz6jexov.cloudfront.net/api/tasks';
-
-\`\`\`
-
-**###** **CORS**
+### CORS
 
 CloudFront solves the HTTPS / Mixed Content problem, but the browser still enforces CORS because GitHub Pages and CloudFront use different origins.
 
 Spring Boot therefore allows the GitHub Pages origin:
 
-\`\`\`java
+```java
 
 @Configuration
 public class CorsConfig {
 
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
+@Bean
+public WebMvcConfigurer corsConfigurer() {
+    return new WebMvcConfigurer() {
 
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry
-                    .addMapping("/api/**")
-                    .allowedOrigins(
-                        "http://localhost:5173",
-                        "https://juan451.github.io"
-                    )
-                    .allowedMethods(
-                        "GET",
-                        "POST",
-                        "PUT",
-                        "PATCH",
-                        "DELETE",
-                        "OPTIONS"
-                    )
-                    .allowedHeaders("*");
-            }
-        };
-    }
+        @Override
+        public void addCorsMappings(CorsRegistry registry) {
+            registry
+                .addMapping("/api/**")
+                .allowedOrigins(
+                    "http://localhost:5173",
+                    "https://juan451.github.io"
+                )
+                .allowedMethods(
+                    "GET",
+                    "POST",
+                    "PUT",
+                    "PATCH",
+                    "DELETE",
+                    "OPTIONS"
+                )
+                .allowedHeaders("*");
+        }
+    };
+}
 
 }
 
-\`\`\`
+```
 
 The production CORS origin is:
 
-\`\`\`text
+```text
 
-https\://juan451.github.io
+https://juan451.github.io
 
-\`\`\`
+```
 
 The repository path is intentionally not included in the CORS origin because an origin consists of the protocol, host and port, not the URL path.
 
-**###** **Updating the backend**
+### Updating the backend
 
 After changing the Spring Boot backend:
 
-\`\`\`text
+```text
 
-1. Update the Java code
+Update the Java code
 
-2. Run ./mvnw clean package
+Run ./mvnw clean package
 
-3. Test with java -jar target/demo-0.0.1-SNAPSHOT.jar
+Test with java -jar target/demo-0.0.1-SNAPSHOT.jar
 
-4. Open the existing Elastic Beanstalk environment
+Open the existing Elastic Beanstalk environment
 
-5. Use "Upload and deploy"
+Use "Upload and deploy"
 
-6. Upload target/demo-0.0.1-SNAPSHOT.jar
+Upload target/demo-0.0.1-SNAPSHOT.jar
 
-7. Wait until the environment health returns to OK
+Wait until the environment health returns to OK
 
-8. Verify https://d1wohnfz6jexov.cloudfront.net/api/tasks
+Verify https://d1wohnfz6jexov.cloudfront.net/api/tasks
 
-\`\`\`
+```
 
 The existing Elastic Beanstalk environment and CloudFront distribution can be reused; a new environment is not required for every backend release.
 
-**###** **Troubleshooting**
+### Troubleshooting
 
 If Tasks work locally but not from GitHub Pages, check the browser console.
 
-**Mixed Content**
+Mixed Content
 
-\`\`\`text
+```text
 
 Mixed Content: the page was loaded over HTTPS,
 but requested an insecure HTTP resource.
 
-\`\`\`
+```
 
 Cause:
 
-\`\`\`text
+```text
 
 GitHub Pages HTTPS → Elastic Beanstalk HTTP
 
-\`\`\`
+```
 
 Solution:
 
-\`\`\`text
+```text
 
 Use the CloudFront HTTPS endpoint in TASKS_BASE_URL.
 
-\`\`\`
+```
 
-**CORS**
+CORS
 
-\`\`\`text
+```text
 
 No 'Access-Control-Allow-Origin' header is present.
 
-\`\`\`
+```
 
 Cause:
 
-\`\`\`text
+```text
 
 Spring Boot does not allow the GitHub Pages origin.
 
-\`\`\`
+```
 
 Solution:
 
-\`\`\`text
+```text
 
 Allow https://juan451.github.io in the Spring Boot CORS configuration,
 rebuild the JAR and deploy the new version to Elastic Beanstalk.
 
-\`\`\`
+```
 
-**---**
+---
 
-**#** **Notification Architecture**
+# Notification Architecture
 
 The notification system demonstrates a simple full-stack flow.
 
-\`\`\`text
+```text
 
 React form
 
-    ↓
+↓
 
 fetch()
 
-    ↓
+↓
 
 Netlify Function
 
-    ↓
+↓
 
 Resend API
 
-    ↓
+↓
 
 Email
 
-\`\`\`
+```
 
 The frontend sends:
 
-\`\`\`json
-
+```json
 {
+  "name": "...",
 
-"name": "...",
+  "email": "...",
 
-"email": "...",
-
-"message": "..."
-
+  "message": "..."
 }
-
-\`\`\`
+```
 
 The serverless function decides the recipient.
 
@@ -1926,190 +1870,174 @@ The frontend does not control the destination email address.
 
 This prevents users from turning the application into an arbitrary email sending endpoint.
 
-**---**
+---
 
-**#** **Shadow DOM vs Light DOM**
+# Shadow DOM vs Light DOM
 
 The project demonstrates both approaches.
 
-**##** **Shadow DOM**
+## Shadow DOM
 
 Used by reusable components such as:
 
-\`\`\`html
-
-\<task-card>\</task-card>
-
-\`\`\`
+```html
+<task-card></task-card>
+```
 
 Advantages:
 
-\- Style encapsulation
+- Style encapsulation
 
-\- Internal DOM isolation
+- Internal DOM isolation
 
-\- Protection from global CSS
+- Protection from global CSS
 
-\- Good fit for reusable Design System components
+- Good fit for reusable Design System components
 
-**---**
+---
 
-**##** **Light DOM**
+## Light DOM
 
 Used by some page-level components:
 
-\`\`\`js
+```js
 
 createRenderRoot() {
 
-_return_ this;
+return this;
 
 }
 
-\`\`\`
+```
 
 Advantages:
 
-\- Global styles can target page content
+- Global styles can target page content
 
-\- Easier application-level layout styling
+- Easier application-level layout styling
 
-\- Useful when working with existing global CSS architecture
+- Useful when working with existing global CSS architecture
 
-**---**
+---
 
-**#** **Slots**
+# Slots
 
 The project demonstrates slots using:
 
-\`\`\`html
-
-\<meal-detail>\</meal-detail>
-
-\`\`\`
+```html
+<meal-detail></meal-detail>
+```
 
 Slots allow a component to define where external Light DOM content should appear inside its Shadow DOM.
 
 Example:
 
-\`\`\`html
-
-\<slot name="title">\</slot>
-
-\`\`\`
+```html
+<slot name="title"></slot>
+```
 
 Consumer:
 
-\`\`\`html
-
-\<h2 slot="title">Chicken Curry\</h2>
-
-\`\`\`
+```html
+<h2 slot="title">Chicken Curry</h2>
+```
 
 Slots allow reusable components to control layout while letting consumers provide content.
 
-**---**
+---
 
-**#** **Custom Events**
+# Custom Events
 
 Web Components communicate upward using Custom Events.
 
 Example:
 
-\`\`\`js
-
+```js
 this.dispatchEvent(
-
-new CustomEvent('toggle-task', {
-
+  new CustomEvent('toggle-task', {
     detail: {
-
       id: this.task.id,
-
     },
 
     bubbles: true,
 
     composed: true,
-
-}),
-
+  }),
 );
+```
 
-\`\`\`
+`bubbles: true` allows the event to bubble through the DOM.
 
-\`bubbles: true\` allows the event to bubble through the DOM.
+`composed: true` allows the event to cross Shadow DOM boundaries.
 
-\`composed: true\` allows the event to cross Shadow DOM boundaries.
+---
 
-**---**
-
-**#** **Learning Objectives**
+# Learning Objectives
 
 This project demonstrates practical examples of:
 
-\- JavaScript
+- JavaScript
 
-\- Lit
+- Lit
 
-\- Open Cells
+- Open Cells
 
-\- React
+- React
 
-\- Web Components
+- Web Components
 
-\- Shadow DOM
+- Shadow DOM
 
-\- Light DOM
+- Light DOM
 
-\- Slots
+- Slots
 
-\- Custom Events
+- Custom Events
 
-\- Reactive properties
+- Reactive properties
 
-\- Page lifecycle
+- Page lifecycle
 
-\- REST APIs
+- REST APIs
 
-\- Fetch API
+- Fetch API
 
-\- Async JavaScript
+- Async JavaScript
 
-\- Separation of concerns
+- Separation of concerns
 
-\- Data Manager pattern
+- Data Manager pattern
 
-\- Serverless functions
+- Serverless functions
 
-\- Email APIs
+- Email APIs
 
-\- Environment variables
+- Environment variables
 
-\- Sinon
+- Sinon
 
-\- Component testing
+- Component testing
 
-\- Git
+- Git
 
-\- GitHub Actions
+- GitHub Actions
 
-\- GitHub Pages
+- GitHub Pages
 
-\- Netlify
+- Netlify
 
-\- AWS Elastic Beanstalk
+- AWS Elastic Beanstalk
 
-\- Amazon EC2
+- Amazon EC2
 
-\- Amazon CloudFront
+- Amazon CloudFront
 
-\- Spring Boot deployment
+- Spring Boot deployment
 
-\- CORS
+- CORS
 
-\- HTTPS / Mixed Content
+- HTTPS / Mixed Content
 
-\- Continuous Deployment
+- Continuous Deployment
 
 The application is intended both as a learning project and as a reference implementation for experimenting with modern frontend architecture.
