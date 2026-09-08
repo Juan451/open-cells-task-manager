@@ -9,13 +9,12 @@ const ALLOWED_ORIGINS = [
   'http://localhost:8888',
 ];
 
-function getCorsHeaders(origin) {
+const getCorsHeaders = (origin) => {
   const headers = {
     'Content-Type': 'application/json',
-
     'Access-Control-Allow-Headers': 'Content-Type',
-
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    Vary: 'Origin',
   };
 
   if (ALLOWED_ORIGINS.includes(origin)) {
@@ -23,7 +22,7 @@ function getCorsHeaders(origin) {
   }
 
   return headers;
-}
+};
 
 export default async (request) => {
   const origin = request.headers.get('origin');
@@ -31,10 +30,11 @@ export default async (request) => {
   const corsHeaders = getCorsHeaders(origin);
 
   /*
-   * GitHub Pages y Netlify tienen orígenes diferentes.
+   * CORS preflight.
    *
-   * Antes del POST, el navegador realiza una petición
-   * OPTIONS para comprobar la política CORS.
+   * GitHub Pages y Netlify están en dominios
+   * distintos, por lo que el navegador puede
+   * enviar OPTIONS antes del POST.
    */
   if (request.method === 'OPTIONS') {
     if (origin && !ALLOWED_ORIGINS.includes(origin)) {
@@ -56,7 +56,7 @@ export default async (request) => {
   }
 
   /*
-   * La función solamente admite POST.
+   * Solo permitimos POST.
    */
   if (request.method !== 'POST') {
     return new Response(
@@ -71,10 +71,7 @@ export default async (request) => {
   }
 
   /*
-   * Si el POST viene de otro dominio, lo rechazamos.
-   *
-   * Las peticiones sin Origin se permiten porque pueden
-   * proceder de herramientas server-side.
+   * Validamos el origen.
    */
   if (origin && !ALLOWED_ORIGINS.includes(origin)) {
     return new Response(
@@ -91,6 +88,8 @@ export default async (request) => {
   const apiKey = process.env.RESEND_API_KEY;
 
   if (!apiKey) {
+    console.error('RESEND_API_KEY is not configured');
+
     return new Response(
       JSON.stringify({
         error: 'Email service is not configured',
@@ -107,7 +106,7 @@ export default async (request) => {
   try {
     const { name, email, message } = await request.json();
 
-    if (!name || !email || !message) {
+    if (!name?.trim() || !email?.trim() || !message?.trim()) {
       return new Response(
         JSON.stringify({
           error: 'Missing required fields',
@@ -123,10 +122,10 @@ export default async (request) => {
       from: 'Open Cells App <onboarding@resend.dev>',
 
       /*
-       * Este destinatario se controla exclusivamente
-       * desde backend.
+       * Destinatario fijo.
        *
-       * El usuario no puede modificarlo desde React.
+       * El usuario no puede cambiarlo
+       * desde el frontend.
        */
       to: [RECIPIENT_EMAIL],
 
@@ -140,7 +139,7 @@ Contact email: ${email}
 
 Message:
 ${message}
-      `,
+        `.trim(),
     });
 
     if (result.error) {
