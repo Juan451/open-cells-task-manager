@@ -48,7 +48,7 @@ export class MealsPage extends PageMixin(LitElement) {
   firstUpdated() {
     this._dm.searchMeals('');
   }
-  
+
   _clearSearch() {
     this.meals = [];
     this.searchText = '';
@@ -67,8 +67,8 @@ export class MealsPage extends PageMixin(LitElement) {
         id="dataManager"
         @search-meals-success=${this._onSearchMealsSuccess}
         @search-meals-error=${this._onSearchMealsError}
-        @meal-detail-success=${this._onMealDetailSuccess}
-        @meal-detail-error=${this._onMealDetailError}
+        @get-meal-success=${this._onMealDetailSuccess}
+        @get-meal-error=${this._onMealDetailError}
       ></data-manager>
 
       <div class="page-header">
@@ -102,7 +102,6 @@ export class MealsPage extends PageMixin(LitElement) {
       ${this.selectedMeal ? this._renderMealDetail() : ''}
     `;
   }
-
   _renderContent() {
     if (this.loading) {
       return html` <div class="meals-status">Loading meals...</div> `;
@@ -238,6 +237,16 @@ export class MealsPage extends PageMixin(LitElement) {
   }
 
   _openMeal(id) {
+    if (!this._dm) {
+      console.error('Data Manager not found');
+      return;
+    }
+
+    if (typeof this._dm.getMealById !== 'function') {
+      console.error('getMealById does not exist in DataManager');
+      return;
+    }
+
     this._dm.getMealById(id);
   }
 
