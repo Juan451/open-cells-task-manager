@@ -16,7 +16,10 @@ export class DataManager extends LitElement {
   }
 
   async _request(baseUrl, endpoint, options = {}) {
-    const response = await fetch(`${baseUrl}${endpoint}`, options);
+    const response = await fetch(`${baseUrl}${endpoint}`, {
+      cache: 'no-store',
+      ...options,
+    });
 
     if (!response.ok) {
       throw new Error(

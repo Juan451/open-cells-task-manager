@@ -43,4 +43,12 @@ export const routes: RouteDefinition[] = [
       await import('../pages/notifications/notifications-page.js');
     },
   },
+  {
+    path: '/stats',
+    name: 'stats',
+    component: 'stats-page',
+    action: async () => {
+      await import('../pages/stats/stats-page.js');
+    },
+  },
 ];

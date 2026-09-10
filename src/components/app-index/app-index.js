@@ -84,6 +84,10 @@ export class AppIndex extends LitElement {
 
             <span class="menu-text"> Notifications </span>
           </button>
+          <button class="menu-item" @click=${() => this._navigate('stats')}>
+            <span class="menu-icon">📊</span>
+            <span class="menu-text">Stats</span>
+          </button>
         </aside>
 
         <main>
