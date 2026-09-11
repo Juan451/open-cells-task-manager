@@ -33,9 +33,6 @@ export function NotificationForm() {
     setError('');
 
     try {
-      console.log('Hostname:', window.location.hostname);
-      console.log('Notification URL:', NOTIFICATION_URL);
-
       const response = await fetch(NOTIFICATION_URL, {
         method: 'POST',
 
@@ -47,12 +44,6 @@ export function NotificationForm() {
       });
 
       const data = await response.json().catch(() => ({}));
-
-      console.log('Notification response:', {
-        status: response.status,
-        ok: response.ok,
-        data,
-      });
 
       if (!response.ok) {
         throw new Error(

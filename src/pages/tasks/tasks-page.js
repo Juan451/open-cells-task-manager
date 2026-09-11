@@ -1,14 +1,29 @@
 import { LitElement, html } from 'lit';
 
+import { PageMixin } from '@open-cells/page-mixin';
+
 import '../../components/task-card/task-card.js';
 import '../../components/dm/data-manager.js';
 
-export class TasksPage extends LitElement {
+export class TasksPage extends PageMixin(LitElement) {
   static properties = {
     tasks: {
       state: true,
     },
+
     newTaskTitle: {
+      state: true,
+    },
+
+    loading: {
+      state: true,
+    },
+
+    error: {
+      state: true,
+    },
+
+    isAuthenticated: {
       state: true,
     },
   };
@@ -18,15 +33,47 @@ export class TasksPage extends LitElement {
 
     this.tasks = [];
     this.newTaskTitle = '';
+
+    this.loading = false;
+    this.error = '';
+    this.isAuthenticated = false;
   }
 
   createRenderRoot() {
     return this;
   }
 
-  firstUpdated() {
+  async onPageEnter() {
+    this.tasks = [];
+    this.newTaskTitle = '';
+    this.error = '';
+
+    const token = sessionStorage.getItem('authToken');
+
+    this.isAuthenticated = Boolean(token);
+
+    if (!token) {
+      console.warn('[TasksPage] No auth token');
+
+      this.loading = false;
+
+      return;
+    }
+
+    this.loading = true;
+
+    await this.updateComplete;
+
     this._dataManager = this.querySelector('data-manager');
-    this._dataManager.getTasks();
+
+    this._dataManager?.getTasks();
+  }
+
+  onPageLeave() {
+    this.tasks = [];
+    this.newTaskTitle = '';
+    this.loading = false;
+    this.error = '';
   }
 
   render() {
@@ -37,6 +84,7 @@ export class TasksPage extends LitElement {
         @toggle-task-success=${this._onToggleTaskSuccess}
         @toggle-task-error=${this._onToggleTaskError}
         @create-task-success=${this._onCreateTaskSuccess}
+        @create-task-error=${this._onCreateTaskError}
       ></data-manager>
 
       <div class="page-header">
@@ -46,16 +94,53 @@ export class TasksPage extends LitElement {
 
         <p>Manage your tasks while learning LitElement and Open Cells.</p>
       </div>
+
+      ${this._renderContent()}
+    `;
+  }
+
+  _renderContent() {
+    // Usuario NO logueado
+    if (!this.isAuthenticated) {
+      return html`
+        <div class="tasks-auth-message">
+          <h3>Login required</h3>
+
+          <p>You need to log in to manage your tasks.</p>
+        </div>
+      `;
+    }
+
+    // Cargando tasks
+    if (this.loading) {
+      return html`
+        <div class="tasks-loading">
+          <div class="tasks-spinner"></div>
+
+          <p>Loading your tasks...</p>
+        </div>
+      `;
+    }
+
+    // Error GET
+    if (this.error) {
+      return html` <div class="tasks-error">${this.error}</div> `;
+    }
+
+    // Usuario correctamente autenticado
+    return html`
       <form class="task-form" @submit=${this._onCreateTask}>
         <input
           type="text"
           placeholder="New task..."
           .value=${this.newTaskTitle}
-          @input=${(e) => (this.newTaskTitle = e.target.value)}
+          @input=${this._onTaskTitleInput}
           required
         />
+
         <button class="btn" type="submit">Add task</button>
       </form>
+
       <div class="tasks-list" @toggle-task=${this._onToggleTask}>
         ${this.tasks.length
           ? this.tasks.map(
@@ -66,17 +151,30 @@ export class TasksPage extends LitElement {
     `;
   }
 
+  _onTaskTitleInput(event) {
+    this.newTaskTitle = event.target.value;
+  }
+
   _onGetTasksSuccess(event) {
-    this.tasks = event.detail.tasks;
+    this.tasks = event.detail.tasks ?? [];
+
+    this.loading = false;
+    this.error = '';
   }
 
   _onGetTasksError(event) {
-    console.error('Error al cargar las tareas:', event.detail.error);
+    console.error('[TasksPage] Error loading tasks:', event.detail.error);
+
+    this.tasks = [];
+    this.loading = false;
+
+    this.error = 'Your tasks could not be loaded.';
   }
 
   _onToggleTask(event) {
     const { id } = event.detail;
-    this._dataManager.toggleTask(id);
+
+    this._dataManager?.toggleTask(id);
   }
 
   _onToggleTaskSuccess(event) {
@@ -88,16 +186,29 @@ export class TasksPage extends LitElement {
   }
 
   _onToggleTaskError(event) {
-    console.error('Error al actualizar la tarea:', event.detail.error);
+    console.error('[TasksPage] Error updating task:', event.detail.error);
   }
+
   _onCreateTask(event) {
     event.preventDefault();
-    this._dataManager.createTask(this.newTaskTitle.trim());
+
+    const title = this.newTaskTitle.trim();
+
+    if (!title) {
+      return;
+    }
+
+    this._dataManager?.createTask(title);
   }
 
   _onCreateTaskSuccess(event) {
     this.tasks = [...this.tasks, event.detail.task];
+
     this.newTaskTitle = '';
+  }
+
+  _onCreateTaskError(event) {
+    console.error('[TasksPage] Error creating task:', event.detail.error);
   }
 }
 

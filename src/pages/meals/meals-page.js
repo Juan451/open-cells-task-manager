@@ -40,8 +40,6 @@ export class MealsPage extends PageMixin(LitElement) {
     return this;
   }
   onPageLeave() {
-    console.log('me he salido?', this.meals);
-
     this._clearSearch();
   }
 

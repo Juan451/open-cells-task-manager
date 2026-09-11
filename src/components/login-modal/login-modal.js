@@ -1,45 +1,56 @@
 import { LitElement, html } from 'lit';
 
+import { styles } from './login-modal.css.js';
+
 import '../dm/data-manager.js';
 
 export class LoginModal extends LitElement {
+  static styles = styles;
+
   static properties = {
-    email: { state: true },
-    password: { state: true },
-    error: { state: true },
-    loading: { state: true },
+    email: {
+      state: true,
+    },
+
+    password: {
+      state: true,
+    },
+
+    error: {
+      state: true,
+    },
+
+    loading: {
+      state: true,
+    },
   };
 
   constructor() {
     super();
+
     this.email = '';
     this.password = '';
     this.error = '';
     this.loading = false;
   }
 
-  createRenderRoot() {
-    return this;
-  }
-
   get _dm() {
-    return this.querySelector('data-manager');
+    return this.renderRoot.querySelector('data-manager');
   }
 
   get _dialog() {
-    return this.querySelector('dialog');
+    return this.renderRoot.querySelector('dialog');
   }
 
   firstUpdated() {
-    this._dialog.showModal();
-    this._dialog.addEventListener('close', this._onDialogClose);
-    this._dialog.addEventListener('click', this._onBackdropClick);
-  }
+    const dialog = this._dialog;
 
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    this._dialog?.removeEventListener('close', this._onDialogClose);
-    this._dialog?.removeEventListener('click', this._onBackdropClick);
+    if (!dialog) {
+      console.error('[LoginModal] Dialog not found');
+      return;
+    }
+
+    dialog.showModal();
   }
 
   render() {
@@ -49,76 +60,124 @@ export class LoginModal extends LitElement {
         @login-error=${this._onLoginError}
       ></data-manager>
 
-      <dialog class="login-modal">
-        <button
-          class="login-modal__close"
-          type="button"
-          @click=${this._requestClose}
-          aria-label="Close"
-        >
-          ✕
-        </button>
+      <dialog
+        class="login-modal"
+        @close=${this._onDialogClose}
+        @click=${this._onBackdropClick}
+      >
+        <div class="login-modal__content">
+          <button
+            class="login-modal__close"
+            type="button"
+            @click=${this._requestClose}
+            aria-label="Close"
+          >
+            ✕
+          </button>
 
-        <div class="page-header">
-          <p class="pretitle">OPEN CELLS TASK MANAGER</p>
-          <h1>Sign in</h1>
-          <p>Access your tasks.</p>
+          <div class="login-modal__brand">
+            <span class="login-modal__brand-dot"></span>
+
+            OPEN CELLS TASK MANAGER
+          </div>
+
+          <div class="login-modal__header">
+            <h1>Sign in</h1>
+
+            <p>Access your personal workspace and manage your tasks.</p>
+          </div>
+
+          <form class="login-modal__form" @submit=${this._onSubmit}>
+            <label class="login-modal__field">
+              <span>Email</span>
+
+              <input
+                type="email"
+                autocomplete="email"
+                placeholder="name@example.com"
+                required
+                .value=${this.email}
+                @input=${this._onEmailInput}
+              />
+            </label>
+
+            <label class="login-modal__field">
+              <span>Password</span>
+
+              <input
+                type="password"
+                autocomplete="current-password"
+                placeholder="Enter your password"
+                required
+                minlength="6"
+                .value=${this.password}
+                @input=${this._onPasswordInput}
+              />
+            </label>
+
+            ${this.error
+              ? html` <div class="login-modal__error">${this.error}</div> `
+              : ''}
+
+            <button
+              class="login-modal__submit"
+              type="submit"
+              ?disabled=${this.loading}
+            >
+              ${this.loading
+                ? html`
+                    <span class="login-modal__spinner"></span>
+                    <span>Signing in...</span>
+                  `
+                : html`
+                    <span>Sign in</span>
+                    <span aria-hidden="true">→</span>
+                  `}
+            </button>
+          </form>
+
+          <div class="login-modal__footer">
+            <span> New to Open Cells Task Manager? </span>
+
+            <button
+              type="button"
+              class="login-modal__register"
+              @click=${this._goToRegister}
+            >
+              <span>Create account</span>
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
         </div>
-
-        <form class="auth-form" @submit=${this._onSubmit}>
-          <label class="auth-form__field">
-            <span>Email</span>
-            <input
-              type="email"
-              required
-              .value=${this.email}
-              @input=${(e) => (this.email = e.target.value)}
-            />
-          </label>
-
-          <label class="auth-form__field">
-            <span>Password</span>
-            <input
-              type="password"
-              required
-              minlength="6"
-              .value=${this.password}
-              @input=${(e) => (this.password = e.target.value)}
-            />
-          </label>
-
-          ${this.error
-            ? html`<p class="auth-form__error">${this.error}</p>`
-            : ''}
-
-          <button class="btn" type="submit" ?disabled=${this.loading}>
-            ${this.loading ? 'Please wait...' : 'Sign in'}
-          </button>
-
-          <button class="link-arrow" type="button" @click=${this._goToRegister}>
-            Don't have an account? Sign up
-          </button>
-        </form>
       </dialog>
     `;
   }
 
-  _onDialogClose = () => {
-    this.dispatchEvent(
-      new CustomEvent('login-modal-close', { bubbles: true, composed: true }),
-    );
-  };
+  _onEmailInput(event) {
+    this.email = event.target.value;
+  }
 
-  _onBackdropClick = (event) => {
-    // Un clic sobre el propio <dialog> (no sobre su contenido interno)
-    // significa que se hizo clic en el backdrop.
+  _onPasswordInput(event) {
+    this.password = event.target.value;
+  }
+
+  _onDialogClose() {
+    this.dispatchEvent(
+      new CustomEvent('login-modal-close', {
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
+
+  _onBackdropClick(event) {
     if (event.target === this._dialog) {
       this._requestClose();
     }
-  };
+  }
 
   _requestClose() {
-    this._dialog.close();
+    this._dialog?.close();
   }
 
   _onSubmit(event) {
@@ -127,20 +186,24 @@ export class LoginModal extends LitElement {
     this.loading = true;
     this.error = '';
 
-    this._dm.login(this.email, this.password);
+    this._dm?.login(this.email.trim(), this.password);
   }
 
   _onLoginSuccess(event) {
     const { token, email } = event.detail.data;
 
     sessionStorage.setItem('authToken', token);
+
     sessionStorage.setItem('authEmail', email);
 
     this.loading = false;
 
     this.dispatchEvent(
       new CustomEvent('login-modal-success', {
-        detail: { email },
+        detail: {
+          email,
+        },
+
         bubbles: true,
         composed: true,
       }),
@@ -149,6 +212,7 @@ export class LoginModal extends LitElement {
 
   _onLoginError() {
     this.loading = false;
+
     this.error = 'Email o contraseña incorrectos.';
   }
 
