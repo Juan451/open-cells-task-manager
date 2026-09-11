@@ -215,4 +215,65 @@ export const styles = css`
       transform: translateY(0);
     }
   }
+  .nav-icon-link {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .nav-icon {
+    width: 24px;
+    height: 24px;
+  }
+  .account-area {
+    position: relative;
+  }
+
+  .nav-icon-link {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    color: var(--color-blue-dark);
+  }
+
+  .nav-icon-link:hover {
+    color: var(--color-core-blue);
+  }
+
+  .account-menu {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    background: var(--color-white);
+    border: 1px solid var(--color-grey-mid);
+    border-radius: 4px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    padding: 0.75rem;
+    min-width: 200px;
+    z-index: 50;
+  }
+
+  .account-menu__email {
+    margin: 0 0 0.5rem;
+    font-size: 0.85rem;
+    color: var(--color-grey);
+    word-break: break-all;
+  }
+
+  .account-menu__logout {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--color-red);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--color-red);
+    font-family: inherit;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+
+  .account-menu__logout:hover {
+    background: var(--color-red);
+    color: var(--color-white);
+  }
 `;

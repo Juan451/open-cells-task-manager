@@ -8,12 +8,16 @@ export class TasksPage extends LitElement {
     tasks: {
       state: true,
     },
+    newTaskTitle: {
+      state: true,
+    },
   };
 
   constructor() {
     super();
 
     this.tasks = [];
+    this.newTaskTitle = '';
   }
 
   createRenderRoot() {
@@ -32,6 +36,7 @@ export class TasksPage extends LitElement {
         @get-tasks-error=${this._onGetTasksError}
         @toggle-task-success=${this._onToggleTaskSuccess}
         @toggle-task-error=${this._onToggleTaskError}
+        @create-task-success=${this._onCreateTaskSuccess}
       ></data-manager>
 
       <div class="page-header">
@@ -41,7 +46,16 @@ export class TasksPage extends LitElement {
 
         <p>Manage your tasks while learning LitElement and Open Cells.</p>
       </div>
-
+      <form class="task-form" @submit=${this._onCreateTask}>
+        <input
+          type="text"
+          placeholder="New task..."
+          .value=${this.newTaskTitle}
+          @input=${(e) => (this.newTaskTitle = e.target.value)}
+          required
+        />
+        <button class="btn" type="submit">Add task</button>
+      </form>
       <div class="tasks-list" @toggle-task=${this._onToggleTask}>
         ${this.tasks.length
           ? this.tasks.map(
@@ -75,6 +89,15 @@ export class TasksPage extends LitElement {
 
   _onToggleTaskError(event) {
     console.error('Error al actualizar la tarea:', event.detail.error);
+  }
+  _onCreateTask(event) {
+    event.preventDefault();
+    this._dataManager.createTask(this.newTaskTitle.trim());
+  }
+
+  _onCreateTaskSuccess(event) {
+    this.tasks = [...this.tasks, event.detail.task];
+    this.newTaskTitle = '';
   }
 }
 

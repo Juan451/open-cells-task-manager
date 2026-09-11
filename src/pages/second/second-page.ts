@@ -12,10 +12,18 @@ export class SecondPage extends LitElement {
 
   render() {
     return html`
-      <button class="page-back" @click="${() => this.pageController.navigate('home')}">Back to home</button>
+      <button
+        class="page-back"
+        @click="${() => this.pageController.navigate('home')}"
+      >
+        Back to home
+      </button>
       <div class="page-header">
         <h1>Keep building</h1>
-        <p>The router handled this transition for you. Just the beginning. Here&apos;s more about what Open Cells gives you out of the box:</p>
+        <p>
+          The router handled this transition for you. Just the beginning.
+          Here&apos;s more about what Open Cells gives you out of the box:
+        </p>
       </div>
       <div class="grid">
         <div class="tile">
@@ -39,7 +47,13 @@ export class SecondPage extends LitElement {
             <span>A clean baseline to add integration and unit tests</span>
           </div>
         </div>
-        <a class="link-arrow docs-link" href="https://www.opencells.dev/docs/index.html" target="_blank" rel="noopener">More in Open Cells docs</a>
+        <a
+          class="link-arrow docs-link"
+          href="https://www.opencells.dev/docs/index.html"
+          target="_blank"
+          rel="noopener"
+          >More in Open Cells docs</a
+        >
       </div>
     `;
   }

@@ -4,6 +4,8 @@ const MEALS_BASE_URL = 'https://www.themealdb.com/api/json/v1/1';
 
 const TASKS_BASE_URL = 'https://d1wohnfz6jexov.cloudfront.net/api/tasks';
 
+const AUTH_BASE_URL = 'https://d1wohnfz6jexov.cloudfront.net/api/auth';
+
 export class DataManager extends LitElement {
   dispatchCustomEvent(eventName, detail = {}) {
     this.dispatchEvent(
@@ -16,9 +18,17 @@ export class DataManager extends LitElement {
   }
 
   async _request(baseUrl, endpoint, options = {}) {
+    const token = sessionStorage.getItem('authToken');
+
+    const headers = {
+      ...(options.headers || {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+
     const response = await fetch(`${baseUrl}${endpoint}`, {
       cache: 'no-store',
       ...options,
+      headers,
     });
 
     if (!response.ok) {
@@ -180,6 +190,50 @@ export class DataManager extends LitElement {
         error,
         id,
       });
+    }
+  }
+
+  async createTask(title) {
+    try {
+      const task = await this._request(TASKS_BASE_URL, '', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title }),
+      });
+
+      this.dispatchCustomEvent('create-task-success', { task });
+    } catch (error) {
+      this.dispatchCustomEvent('create-task-error', { error });
+    }
+  }
+
+  // --- Register mail for users---
+
+  async register(email, password) {
+    try {
+      const data = await this._request(AUTH_BASE_URL, '/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      this.dispatchCustomEvent('register-success', { data });
+    } catch (error) {
+      this.dispatchCustomEvent('register-error', { error });
+    }
+  }
+
+  async login(email, password) {
+    try {
+      const data = await this._request(AUTH_BASE_URL, '/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      this.dispatchCustomEvent('login-success', { data });
+    } catch (error) {
+      this.dispatchCustomEvent('login-error', { error });
     }
   }
 }
