@@ -1,39 +1,34 @@
 import { LitElement, html } from 'lit';
-
 import { PageMixin } from '@open-cells/page-mixin';
+import { connectStore } from '../../store/connect-mixin.js';
+import { store } from '../../store/store.js';
+import { restoreSession } from '../../store/authSlice.js';
+import {
+  resetTasksPage,
+  setLoading,
+  setError,
+  setNewTaskTitle,
+  getTasksSuccess,
+  toggleTaskSuccess,
+  createTaskSuccess,
+} from '../../store/tasksSlice.js';
 
 import '../../components/task-card/task-card.js';
 import '../../components/dm/data-manager.js';
 
-export class TasksPage extends PageMixin(LitElement) {
+export class TasksPage extends connectStore(PageMixin(LitElement)) {
   static properties = {
-    tasks: {
-      state: true,
-    },
-
-    newTaskTitle: {
-      state: true,
-    },
-
-    loading: {
-      state: true,
-    },
-
-    error: {
-      state: true,
-    },
-
-    isAuthenticated: {
-      state: true,
-    },
+    tasks: { state: true },
+    newTaskTitle: { state: true },
+    loading: { state: true },
+    error: { state: true },
+    isAuthenticated: { state: true },
   };
 
   constructor() {
     super();
-
     this.tasks = [];
     this.newTaskTitle = '';
-
     this.loading = false;
     this.error = '';
     this.isAuthenticated = false;
@@ -43,37 +38,36 @@ export class TasksPage extends PageMixin(LitElement) {
     return this;
   }
 
+  stateChanged(state) {
+    this.tasks = state.tasks.items;
+    this.newTaskTitle = state.tasks.newTaskTitle;
+    this.loading = state.tasks.loading;
+    this.error = state.tasks.error;
+    this.isAuthenticated = state.auth.isAuthenticated;
+  }
+
   async onPageEnter() {
-    this.tasks = [];
-    this.newTaskTitle = '';
-    this.error = '';
+    store.dispatch(resetTasksPage());
 
     const token = sessionStorage.getItem('authToken');
-
-    this.isAuthenticated = Boolean(token);
+    store.dispatch(restoreSession(token));
 
     if (!token) {
       console.warn('[TasksPage] No auth token');
-
       this.loading = false;
-
       return;
     }
 
-    this.loading = true;
+    store.dispatch(setLoading(true));
 
     await this.updateComplete;
 
     this._dataManager = this.querySelector('data-manager');
-
     this._dataManager?.getTasks();
   }
 
   onPageLeave() {
-    this.tasks = [];
-    this.newTaskTitle = '';
-    this.loading = false;
-    this.error = '';
+    store.dispatch(resetTasksPage());
   }
 
   render() {
@@ -89,9 +83,7 @@ export class TasksPage extends PageMixin(LitElement) {
 
       <div class="page-header">
         <p class="pretitle">OPEN CELLS TASK MANAGER</p>
-
         <h1>My tasks</h1>
-
         <p>Manage your tasks while learning LitElement and Open Cells.</p>
       </div>
 
@@ -100,34 +92,28 @@ export class TasksPage extends PageMixin(LitElement) {
   }
 
   _renderContent() {
-    // Usuario NO logueado
     if (!this.isAuthenticated) {
       return html`
         <div class="tasks-auth-message">
           <h3>Login required</h3>
-
           <p>You need to log in to manage your tasks.</p>
         </div>
       `;
     }
 
-    // Cargando tasks
     if (this.loading) {
       return html`
         <div class="tasks-loading">
           <div class="tasks-spinner"></div>
-
           <p>Loading your tasks...</p>
         </div>
       `;
     }
 
-    // Error GET
     if (this.error) {
-      return html` <div class="tasks-error">${this.error}</div> `;
+      return html`<div class="tasks-error">${this.error}</div>`;
     }
 
-    // Usuario correctamente autenticado
     return html`
       <form class="task-form" @submit=${this._onCreateTask}>
         <input
@@ -137,74 +123,54 @@ export class TasksPage extends PageMixin(LitElement) {
           @input=${this._onTaskTitleInput}
           required
         />
-
         <button class="btn" type="submit">Add task</button>
       </form>
 
       <div class="tasks-list" @toggle-task=${this._onToggleTask}>
         ${this.tasks.length
           ? this.tasks.map(
-              (task) => html` <task-card .task=${task}></task-card> `,
+              (task) => html`<task-card .task=${task}></task-card>`,
             )
-          : html` <div class="empty-message">You don't have any tasks.</div> `}
+          : html`<div class="empty-message">You don't have any tasks.</div>`}
       </div>
     `;
   }
 
   _onTaskTitleInput(event) {
-    this.newTaskTitle = event.target.value;
-  }
-
-  _onGetTasksSuccess(event) {
-    this.tasks = event.detail.tasks ?? [];
-
-    this.loading = false;
-    this.error = '';
-  }
-
-  _onGetTasksError(event) {
-    console.error('[TasksPage] Error loading tasks:', event.detail.error);
-
-    this.tasks = [];
-    this.loading = false;
-
-    this.error = 'Your tasks could not be loaded.';
+    store.dispatch(setNewTaskTitle(event.target.value));
   }
 
   _onToggleTask(event) {
     const { id } = event.detail;
-
     this._dataManager?.toggleTask(id);
   }
 
-  _onToggleTaskSuccess(event) {
-    const updatedTask = event.detail.task;
+  _onCreateTask(event) {
+    event.preventDefault();
+    const title = this.newTaskTitle.trim();
+    if (!title) return;
+    this._dataManager?.createTask(title);
+  }
 
-    this.tasks = this.tasks.map((task) =>
-      task.id === updatedTask.id ? updatedTask : task,
-    );
+  _onGetTasksSuccess(event) {
+    store.dispatch(getTasksSuccess(event.detail.tasks));
+  }
+
+  _onGetTasksError(event) {
+    console.error('[TasksPage] Error loading tasks:', event.detail.error);
+    store.dispatch(setError('Your tasks could not be loaded.'));
+  }
+
+  _onToggleTaskSuccess(event) {
+    store.dispatch(toggleTaskSuccess(event.detail.task));
   }
 
   _onToggleTaskError(event) {
     console.error('[TasksPage] Error updating task:', event.detail.error);
   }
 
-  _onCreateTask(event) {
-    event.preventDefault();
-
-    const title = this.newTaskTitle.trim();
-
-    if (!title) {
-      return;
-    }
-
-    this._dataManager?.createTask(title);
-  }
-
   _onCreateTaskSuccess(event) {
-    this.tasks = [...this.tasks, event.detail.task];
-
-    this.newTaskTitle = '';
+    store.dispatch(createTaskSuccess(event.detail.task));
   }
 
   _onCreateTaskError(event) {
