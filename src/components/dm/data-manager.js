@@ -18,7 +18,8 @@ export class DataManager extends LitElement {
   }
 
   async _request(baseUrl, endpoint, options = {}) {
-    const token = sessionStorage.getItem('authToken');
+    const isOwnApi = baseUrl === TASKS_BASE_URL;
+    const token = isOwnApi ? sessionStorage.getItem('authToken') : null;
 
     const headers = {
       ...(options.headers || {}),
@@ -207,7 +208,7 @@ export class DataManager extends LitElement {
     }
   }
 
-  // --- Register mail for users---
+  // --- Auth ---
 
   async register(email, password) {
     try {
