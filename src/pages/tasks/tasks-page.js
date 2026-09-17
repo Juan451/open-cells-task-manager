@@ -18,7 +18,7 @@ import '../../components/dm/data-manager.js';
 
 export class TasksPage extends connectStore(PageMixin(LitElement)) {
   static properties = {
-    tasks: { state: true },
+    tasks: { type: Array, state: true },
     newTaskTitle: { state: true },
     loading: { state: true },
     error: { state: true },
