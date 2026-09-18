@@ -77,7 +77,7 @@ export class AppIndex extends LitElement {
   _onLoginSuccess() {
     this._closeLoginModal();
     this.loggedInEmail = sessionStorage.getItem('authEmail');
-    this._navigate('tasks');
+    this._navigate('home');
   }
 
   _onGoToRegister() {
